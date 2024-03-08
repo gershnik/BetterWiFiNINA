@@ -27,8 +27,6 @@
 
 #include <stdint.h>
 
-#include <new>
-
 #include <IPAddress.h>
 
 #include "utility/socket_drv.h"
@@ -128,7 +126,9 @@ public:
     WiFiSocket(Type type, Protocol proto);
 
     /// Closes the socket
-    ~WiFiSocket();
+    ~WiFiSocket() {
+        close();
+    }
 
     /**
      * Moving a socket
@@ -145,8 +145,11 @@ public:
      * The source socket is left in an invalid state
     */
     WiFiSocket & operator=(WiFiSocket && src) {
-        this->~WiFiSocket();
-        new (this) WiFiSocket(std::move(src));
+        if (this != &src) {
+            close();
+            m_handle = src.m_handle;
+            src.m_handle = s_invalidHandle; 
+        }
         return *this;
     }
 
@@ -244,6 +247,7 @@ public:
 private:
     explicit WiFiSocket(uint8_t handle): m_handle(handle)
     {}
+    void close();
 private:
     uint8_t m_handle = s_invalidHandle;
 };

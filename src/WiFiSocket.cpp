@@ -35,9 +35,10 @@ WiFiSocket::WiFiSocket(Type type, Protocol proto):
 {
 }
 
-WiFiSocket::~WiFiSocket() {
+void WiFiSocket::close() {
     if (m_handle != s_invalidHandle) {
         SocketDrv::close(m_handle);
+        m_handle = s_invalidHandle;
     }
 }
 
