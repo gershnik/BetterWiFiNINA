@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <errno.h>
 
 #include "socket_drv.h"
 #include "spi_drv.h"

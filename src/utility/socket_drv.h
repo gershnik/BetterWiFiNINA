@@ -26,7 +26,6 @@
 #define HEADER_UTILITY_SOCKET_DRV_H_INCLUDED
 
 #include <stdint.h>
-#include <system_error>
 
 #include <IPAddress.h>
 
