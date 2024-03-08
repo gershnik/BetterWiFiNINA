@@ -31,7 +31,7 @@ uint8_t WiFiSocket::lastError() {
 
 
 WiFiSocket::WiFiSocket(Type type, Protocol proto):
-    m_handle(SocketDrv::socket(std::underlying_type_t<Type>(type), std::underlying_type_t<Protocol>(proto)))
+    m_handle(SocketDrv::socket(uint8_t(type), uint8_t(proto)))
 {
 }
 
@@ -74,14 +74,14 @@ int32_t WiFiSocket::recv(void * buf, uint16_t size) {
 
 bool WiFiSocket::setNonBlocking(bool val) {
     uint32_t value = val;
-    auto size = SocketDrv::ioctl(m_handle, std::underlying_type_t<IOControl>(IOControl::NonBlockingIO), 
+    auto size = SocketDrv::ioctl(m_handle, uint32_t(IOControl::NonBlockingIO), 
                                  &value, sizeof(value));
     return size != 0;
 }
 
 int32_t WiFiSocket::availableToRead() const {
     int32_t value = 0;
-    auto size = SocketDrv::ioctl(m_handle, std::underlying_type_t<IOControl>(IOControl::NRead), 
+    auto size = SocketDrv::ioctl(m_handle, uint32_t(IOControl::NRead), 
                                  &value, sizeof(value));
     if (size == 0)
         return -1;
