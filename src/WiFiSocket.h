@@ -27,7 +27,6 @@
 
 #include <stdint.h>
 
-#include <utility>
 #include <new>
 
 #include <IPAddress.h>
@@ -110,7 +109,7 @@ public:
      * Last error is always set, whether the call failed or succeeded.
      * 
      * The returned value is either a standard errno value from
-     * the underlying socket call or one of the Error enumaration values
+     * the underlying socket call or one of the Error enumeration values
      * Their ranges are guaranteed to be distinct.
      * In case of success the value is 0.
     */
@@ -136,8 +135,9 @@ public:
      * 
      * The source socket is left in an invalid state
     */
-    WiFiSocket(WiFiSocket && src): m_handle(std::exchange(src.m_handle, s_invalidHandle))
-    {}
+    WiFiSocket(WiFiSocket && src): m_handle(src.m_handle) { 
+        src.m_handle = s_invalidHandle; 
+    }
 
     /**
      * Move-assigning a socket
@@ -180,8 +180,8 @@ public:
      * @returns a valid socket, if successful or invalid otherwise. Check lastError()
      * for more information about the failure.  
      * 
-     * @param remoteIpAddress if successfull populated by the address of the remote client
-     * @param remotePort if successfull populated by the port of the remote client
+     * @param remoteIpAddress if successful populated by the address of the remote client
+     * @param remotePort if successful populated by the port of the remote client
     */
     WiFiSocket accept(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
 
@@ -200,7 +200,7 @@ public:
      * 
      * @return the amount of data actually sent or -1 on failure. Check lastError() 
      * for more information about failure. The type of the return value is int32_t 
-     * to accomodate -1. When non-negative it will never be bigger than the size parameter.
+     * to accommodate -1. When non-negative it will never be bigger than the size parameter.
     */
     int32_t send(const void * buf, uint16_t size);
 
@@ -209,7 +209,7 @@ public:
      * 
      * @return the amount of data actually read or -1 on failure. Check lastError() 
      * for more information about failure. The type of the return value is int32_t 
-     * to accomodate -1. When non-negative it will never be bigger than the size parameter.
+     * to accommodate -1. When non-negative it will never be bigger than the size parameter.
     */
     int32_t recv(void * buf, uint16_t size);
     
@@ -232,7 +232,7 @@ public:
     int32_t availableToRead() const;
 
     /**
-     * Retrives current socket state bitmask
+     * Retrieves current socket state bitmask
      * 
      * See State enum for possible flags. This call is similar in semantics to 
      * calling select() on the socket.
