@@ -251,6 +251,14 @@ public:
      * 
     */
     bool poll(State & state) const;
+
+    /**
+     * Retrieves underlying socket handle
+     * 
+     * This is for debugging purposes only. 
+    */
+    uint8_t handle() const 
+        { return m_handle; }
 private:
     explicit WiFiSocket(uint8_t handle): m_handle(handle)
     {}
