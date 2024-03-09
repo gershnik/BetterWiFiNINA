@@ -131,6 +131,13 @@ public:
     }
 
     /**
+     * Manually close the socket
+     * 
+     * This makes this object an invalid socket
+    */ 
+    void close();
+
+    /**
      * Moving a socket
      * 
      * The source socket is left in an invalid state
@@ -157,7 +164,7 @@ public:
      * Tests whether the socket is invalid.
      * 
      * A socket is in an invalid state when it represents "no socket".
-     * A valid socket never becomes invalid unless it is moved out. 
+     * A valid socket never becomes invalid unless it is moved out or closed. 
      * Similarly an invalid socket never becomes valid
      * unless moved-in from a valid socket.
      * 
@@ -247,7 +254,6 @@ public:
 private:
     explicit WiFiSocket(uint8_t handle): m_handle(handle)
     {}
-    void close();
 private:
     uint8_t m_handle = s_invalidHandle;
 };
