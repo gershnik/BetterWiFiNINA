@@ -386,6 +386,10 @@ int32_t SocketDrv::send(uint8_t s, const void * buf, uint16_t size) {
     if (!SpiDrv::initialized)
 		SpiDrv::begin();
 
+    //keep the size well below 4096 which seems to be SPI_MAX_DMA_LEN
+    if (size > 4000)
+        size = 4000;
+
     uint8_t cmd = SOCKET_SEND_CMD;
 
     {
