@@ -26,6 +26,7 @@
 #define HEADER_WIFISOCKET_H_INCLUDED
 
 #include <stdint.h>
+#include <time.h>
 
 #include <IPAddress.h>
 
@@ -94,33 +95,93 @@ public:
         SpiFailure = SocketDrv::Failure
     };
 
+    /// Any numeric/boolean valued socket option
+    template<uint32_t Name, class ExternalType, class StorageType = ExternalType> 
+    class ValueOption {
+        static_assert(sizeof(ExternalType) <= sizeof(StorageType));
 
-    /// @brief Any boolean valued socket option
-    template<uint32_t Name> class BooleanOption {
+        friend WiFiSocket;
     public:
         static constexpr uint32_t name = Name;  
 
-        BooleanOption() : m_value(0) {}
-        BooleanOption(bool val): m_value(val) {}
+        ValueOption() : m_value(0) {}
+        explicit ValueOption(ExternalType val): m_value(StorageType(val)) {}
 
-        explicit operator bool() const 
-            { return m_value != 0;}
-        bool value() const 
-            { return m_value != 0;}
+        explicit operator ExternalType() const 
+            { return ExternalType(m_value);}
+        ExternalType value() const 
+            { return ExternalType(m_value);}
 
+    private:
         const void * data() const { return &m_value; }
         void * data() { return &m_value; }
         uint8_t size() const { return sizeof(m_value); }
 
         void resize(uint8_t size) {}
     private:
-        uint32_t m_value;
+        StorageType m_value;
     };
 
-    /// @brief Available socket options types
+    /// A struct-valued socket option
+    template<uint32_t Name, class Struct> 
+    class StructOption : public Struct {
+        friend WiFiSocket;
+    public:
+        static constexpr uint32_t name = Name;  
+
+        StructOption() : Struct{} {}
+        StructOption(const Struct & src): Struct(src) {}
+
+    private:
+        const void * data() const { return static_cast<const Struct *>(this); }
+        void * data() { return static_cast<Struct *>(this); }
+        uint8_t size() const { return sizeof(Struct); }
+
+        void resize(uint8_t size) {}
+    };
+
+    //Linger is supported by lwip but currently not available in Nina 
+    #if 0 
+    struct LingerValue {
+        int onoff;                /* option on/off */
+        int linger;               /* linger time in seconds */
+    };
+    #endif
+
+    /// Available socket options types
     struct Option {
-        /// @brief SO_REUSEADDR option
-        using ReuseAddress = BooleanOption<0x0004>;
+        //see lwip/sockets.h SO_REUSEADDR etc.
+
+        /// SO_REUSEADDR option
+        using ReuseAddress          = ValueOption<0x0004, bool, uint32_t>;
+        /// SO_KEEPALIVE option
+        using KeepAlive             = ValueOption<0x0008, bool, uint32_t>;
+        /// SO_BROADCAST option
+        using Broadcast             = ValueOption<0x0020, bool, uint32_t>;
+
+        /// SO_ACCEPTCONN option
+        using AcceptsConnections    = ValueOption<0x0002, bool, uint32_t>;
+
+        //Linger is supported by lwip but currently not available in Nina 
+        #if 0 
+        /// SO_LINGER option
+        using Linger                = StructOption<0x0080, LingerValue>;
+        /// SO_DONTLINGER option
+        using DontLinger            = StructOption<~Linger::name, LingerValue>;
+        #endif
+
+        /// SO_RCVBUF option
+        using RecvBufferSize        = ValueOption<0x1002, uint32_t>;
+        /// SO_SNDTIMEO option
+        using SendTimeout           = StructOption<0x1005, ::timeval>; 
+        /// SO_RCVTIMEO option
+        using RecvTimeout           = StructOption<0x1006, ::timeval>;
+        /// SO_ERROR option
+        using GetAndClearError      = ValueOption<0x1007, uint8_t, uint32_t>;
+        /// SO_TYPE option
+        using SocketType            = ValueOption<0x1008, WiFiSocket::Type, uint32_t>;
+        /// SO_NO_CHECK option
+        using NoUdpChecksum         = ValueOption<0x100a, bool, uint32_t>;
     };
 
 private:
