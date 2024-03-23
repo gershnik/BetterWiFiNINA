@@ -98,17 +98,17 @@ uint8_t SocketDrv::socket(uint8_t type, uint8_t proto) {
         SelectSlave sel;
     
         // Wait for reply
-        uint8_t _data = 0;
-        uint8_t _dataLen = 0;
-        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &_data, &_dataLen)) {
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return 255;
         }
 
-        if (_data != 255) //255  on remote failure
+        if (data != 255) //255  on remote failure
             g_lastError = 0;
-        return _data; 
+        return data; 
     }
 }
 
@@ -140,15 +140,15 @@ bool SocketDrv::close(uint8_t s) {
         SelectSlave sel;
     
         // Wait for reply
-        uint8_t _data = 0;
-        uint8_t _dataLen = 0;
-        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &_data, &_dataLen)) {
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return false;
         }
 
-        if (_data != 0) {
+        if (data != 0) {
             g_lastError = 0;
             return true;
         }
@@ -176,16 +176,16 @@ uint8_t SocketDrv::lastError() {
         SelectSlave sel;
 
         // Wait for reply
-        uint8_t _data = 0;
-        uint8_t _dataLen = 0;
-        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &_data, &_dataLen)) {
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return SocketDrv::Failure;
         }
 
-        g_lastError = _data;
-        return _data;
+        g_lastError = data;
+        return data;
     }
 }
 
@@ -218,15 +218,15 @@ bool SocketDrv::bind(uint8_t s, uint16_t port) {
         SelectSlave sel;
     
         // Wait for reply
-        uint8_t _data = 0;
-        uint8_t _dataLen = 0;
-        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &_data, &_dataLen)) {
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return false;
         }
 
-        if (_data != 0) {
+        if (data != 0) {
             g_lastError = 0;
             return true;
         }
@@ -262,15 +262,15 @@ bool SocketDrv::listen(uint8_t s, uint8_t backlog) {
         SelectSlave sel;
     
         // Wait for reply
-        uint8_t _data = 0;
-        uint8_t _dataLen = 0;
-        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &_data, &_dataLen)) {
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return false;
         }
 
-        if (_data != 0) {
+        if (data != 0) {
             g_lastError = 0;
             return true;
         }
