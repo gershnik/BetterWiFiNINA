@@ -306,11 +306,11 @@ uint8_t SocketDrv::accept(uint8_t s, arduino::IPAddress & remoteIpAddress, uint1
         // Wait for reply
         uint8_t resultSocket;
         uint8_t remoteIpBuf[4];
-        uint8_t remotePortBuf[2];
+        uint16_t remotePortTmp;
         tParam params[PARAM_NUMS_3] = { 
             {0, (char*)&resultSocket}, 
             {0, (char*)&remoteIpBuf},  
-            {0, (char*)&remotePortBuf}
+            {0, (char*)&remotePortTmp}
         };
         if (!SpiDrv::waitResponseParams(cmd, PARAM_NUMS_3, params)) {
             WARN("error waitResponse");
@@ -321,7 +321,7 @@ uint8_t SocketDrv::accept(uint8_t s, arduino::IPAddress & remoteIpAddress, uint1
         if (resultSocket != 255) {
             g_lastError = 0;
             remoteIpAddress = IPAddress(arduino::IPv4, remoteIpBuf); //buf is in network order
-            remotePort = (uint16_t(remotePortBuf[0]) << 8) | uint16_t(remotePortBuf[1]);
+            remotePort = remotePortTmp; //port is host order
         }
         return resultSocket;
     }
@@ -470,6 +470,125 @@ int32_t SocketDrv::recv(uint8_t s, void * buf, uint16_t size) {
         return dataLen;
     }
 }
+
+int32_t SocketDrv::sendTo(uint8_t s, const void * buf, uint16_t size, 
+                          const arduino::IPAddress & ipAddress, uint16_t port) {
+
+    if (ipAddress.type() != arduino::IPv4) {
+        g_lastError = EINVAL;
+        return false;
+    }
+    auto ipv4Address = uint32_t(ipAddress);
+    uint8_t portNetOrder[2] = {uint8_t(port >> 8), uint8_t(port)};
+    
+    g_lastError.reset();
+    if (!SpiDrv::initialized)
+		SpiDrv::begin();
+
+    //keep the size well below 4096 which seems to be SPI_MAX_DMA_LEN
+    if (size > 4000)
+        size = 4000;
+
+    uint8_t cmd = SOCKET_SENDTO_CMD;
+
+    {
+        SelectSlave sel;
+        
+        // Send Command
+        int commandSize = 4;
+        SpiDrv::sendCmd(cmd, PARAM_NUMS_4);
+        SpiDrv::sendBuffer(&s, sizeof(s), NO_LAST_PARAM);
+        commandSize += (2 + sizeof(s));
+        SpiDrv::sendBuffer((uint8_t *)&ipv4Address, sizeof(ipv4Address), NO_LAST_PARAM);
+        commandSize += (2 + sizeof(ipv4Address));
+        SpiDrv::sendBuffer(portNetOrder, sizeof(portNetOrder), NO_LAST_PARAM);
+        commandSize += (2 + sizeof(portNetOrder));
+        SpiDrv::sendBuffer((uint8_t *)buf, size, LAST_PARAM);
+        commandSize += (2 + size);
+        
+        // pad to multiple of 4
+        while (commandSize % 4) {
+            SpiDrv::readChar();
+            commandSize++;
+        }
+    }
+    {
+        //Wait the reply elaboration
+        SelectSlave sel;
+    
+        // Wait for reply
+        uint8_t data[2] = {};
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, data, &dataLen)) {
+            WARN("error waitResponse");
+            g_lastError = SocketDrv::Failure;
+            return -1;
+        }
+
+        uint16_t ret = (uint16_t(data[0]) << 8) | uint16_t(data[1]);
+        if (ret)
+            g_lastError = 0;
+        return ret;
+    }
+}
+
+int32_t SocketDrv::recvFrom(uint8_t s, void * buf, uint16_t size, 
+                            arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
+    g_lastError.reset();
+    if (!SpiDrv::initialized)
+		SpiDrv::begin();
+
+    //keep the size well below 4096 which seems to be SPI_MAX_DMA_LEN
+    if (size > 4000)
+        size = 4000;
+
+    uint8_t cmd = SOCKET_RECVFROM_CMD;
+
+    {
+        SelectSlave sel;
+        
+        // Send Command
+        int commandSize = 4;
+        SpiDrv::sendCmd(cmd, PARAM_NUMS_2);
+        SpiDrv::sendParam(&s, sizeof(s), NO_LAST_PARAM);
+        commandSize += (1 + sizeof(s));
+        SpiDrv::sendParam((uint8_t*)&size, sizeof(size), LAST_PARAM);
+        commandSize += (1 + sizeof(size));
+        
+        // pad to multiple of 4
+        while (commandSize % 4) {
+            SpiDrv::readChar();
+            commandSize++;
+        }
+    }
+    {
+        //Wait the reply elaboration
+        SelectSlave sel;
+    
+        // Wait for reply
+        uint8_t remoteIpBuf[4];
+        uint16_t remotePortTmp;
+        tDataParam params[PARAM_NUMS_3] = { 
+            {0, (char*)&remoteIpBuf},  
+            {0, (char*)&remotePortTmp},
+            {0, (char*)buf}
+        };
+        if (!SpiDrv::waitResponseParams(cmd, PARAM_NUMS_3, params)) {
+            WARN("error waitResponse");
+            g_lastError = SocketDrv::Failure;
+            return -1;
+        }
+
+        if (params[2].dataLen) {
+            g_lastError = 0;
+            remoteIpAddress = IPAddress(arduino::IPv4, remoteIpBuf); //buf is in network order
+            remotePort = remotePortTmp; //port is in host order
+        }
+
+        return params[2].dataLen;
+    }
+}
+    
 
 uint8_t SocketDrv::ioctl(uint8_t s, uint32_t code, void * buf, uint8_t bufSize) {
 

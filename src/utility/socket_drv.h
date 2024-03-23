@@ -53,6 +53,8 @@ namespace SocketDrv {
     bool connect(uint8_t s, const arduino::IPAddress & ipAddress, uint16_t port);
     int32_t send(uint8_t s, const void * buf, uint16_t size);
     int32_t recv(uint8_t s, void * buf, uint16_t size);
+    int32_t sendTo(uint8_t s, const void * buf, uint16_t size, const arduino::IPAddress & ipAddress, uint16_t port);
+    int32_t recvFrom(uint8_t s, void * buf, uint16_t size, arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
     uint8_t ioctl(uint8_t s, uint32_t code, void * buf, uint8_t bufSize);
     SocketState poll(uint8_t s);
 

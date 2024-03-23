@@ -199,10 +199,10 @@ public:
      * Connects a socket to remote endpoint
      * 
      * @returns success flag. Check lastError() for more information about failure
-     * @param remoteIpAddress host to connect to
-     * @param remotePort port to connect to
+     * @param ipAddress host to connect to
+     * @param port port to connect to
     */
-    bool connect(const arduino::IPAddress & remoteIpAddress, uint16_t remotePort);
+    bool connect(const arduino::IPAddress & ipAddress, uint16_t port);
 
 
     /**
@@ -222,6 +222,24 @@ public:
      * to accommodate -1. When non-negative it will never be bigger than the size parameter.
     */
     int32_t recv(void * buf, uint16_t size);
+
+    /**
+     * Sends data to remote endpoint
+     * 
+     * @return the amount of data actually sent or -1 on failure. Check lastError() 
+     * for more information about failure. The type of the return value is int32_t 
+     * to accommodate -1. When non-negative it will never be bigger than the size parameter.
+    */
+    int32_t sendTo(const void * buf, uint16_t size, const arduino::IPAddress & ipAddress, uint16_t port);
+
+    /**
+     * Receives data from remote endpoint
+     * 
+     * @return the amount of data actually read or -1 on failure. Check lastError() 
+     * for more information about failure. The type of the return value is int32_t 
+     * to accommodate -1. When non-negative it will never be bigger than the size parameter.
+    */
+    int32_t recvFrom(void * buf, uint16_t size, arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
     
     /** 
      * Sets the socket into non-blocking or blocking mode

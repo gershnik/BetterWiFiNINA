@@ -55,8 +55,8 @@ WiFiSocket WiFiSocket::accept(arduino::IPAddress & remoteIpAddress, uint16_t & r
     return WiFiSocket(res);
 }
 
-bool WiFiSocket::connect(const arduino::IPAddress & remoteIpAddress, uint16_t remotePort) {
-    return SocketDrv::connect(m_handle, remoteIpAddress, remotePort);
+bool WiFiSocket::connect(const arduino::IPAddress & ipAddress, uint16_t port) {
+    return SocketDrv::connect(m_handle, ipAddress, port);
 }
 
 int32_t WiFiSocket::send(const void * buf, uint16_t size) {
@@ -68,6 +68,22 @@ int32_t WiFiSocket::send(const void * buf, uint16_t size) {
 
 int32_t WiFiSocket::recv(void * buf, uint16_t size) {
     auto ret = SocketDrv::recv(m_handle, buf, size);
+    if (ret == 0 && lastError() != 0)
+        ret = -1;
+    return ret;
+}
+
+int32_t WiFiSocket::sendTo(const void * buf, uint16_t size, 
+                           const arduino::IPAddress & ipAddress, uint16_t port) {
+    auto ret = SocketDrv::sendTo(m_handle, buf, size, ipAddress, port);
+    if (ret == 0 && lastError() != 0)
+        ret = -1;
+    return ret;
+}
+
+int32_t WiFiSocket::recvFrom(void * buf, uint16_t size, 
+                             arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
+    auto ret = SocketDrv::recvFrom(m_handle, buf, size, remoteIpAddress, remotePort);
     if (ret == 0 && lastError() != 0)
         ret = -1;
     return ret;
