@@ -112,3 +112,7 @@ bool WiFiSocket::poll(State & state) const {
     state = State(res);
     return true;
 }
+
+bool WiFiSocket::getPeerName(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
+    return SocketDrv::getPeerName(m_handle, remoteIpAddress, remotePort);
+}

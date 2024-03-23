@@ -59,6 +59,7 @@ namespace SocketDrv {
     SocketState poll(uint8_t s);
     bool setsockopt(uint8_t s, uint32_t optionName, const void * option, uint8_t optLen);
     bool getsockopt(uint8_t s, uint32_t optionName, void * option, uint8_t & optLen);
+    bool getPeerName(uint8_t s, arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
 }
 
 

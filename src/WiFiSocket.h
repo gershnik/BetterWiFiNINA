@@ -26,7 +26,6 @@
 #define HEADER_WIFISOCKET_H_INCLUDED
 
 #include <stdint.h>
-#include <time.h>
 
 #include <IPAddress.h>
 
@@ -122,7 +121,7 @@ public:
         StorageType m_value;
     };
 
-    /// A struct-valued socket option
+    /// Any struct-valued socket option
     template<uint32_t Name, class Struct> 
     class StructOption : public Struct {
         friend WiFiSocket;
@@ -140,13 +139,10 @@ public:
         void resize(uint8_t size) {}
     };
 
-    //Linger is supported by lwip but currently not available in Nina 
-    #if 0 
-    struct LingerValue {
-        int onoff;                /* option on/off */
-        int linger;               /* linger time in seconds */
+    struct TimeVal {
+        long long	tv_sec;		
+	    long	    tv_usec;
     };
-    #endif
 
     /// Available socket options types
     struct Option {
@@ -161,21 +157,12 @@ public:
 
         /// SO_ACCEPTCONN option
         using AcceptsConnections    = ValueOption<0x0002, bool, uint32_t>;
-
-        //Linger is supported by lwip but currently not available in Nina 
-        #if 0 
-        /// SO_LINGER option
-        using Linger                = StructOption<0x0080, LingerValue>;
-        /// SO_DONTLINGER option
-        using DontLinger            = StructOption<~Linger::name, LingerValue>;
-        #endif
-
         /// SO_RCVBUF option
         using RecvBufferSize        = ValueOption<0x1002, uint32_t>;
         /// SO_SNDTIMEO option
-        using SendTimeout           = StructOption<0x1005, ::timeval>; 
+        using SendTimeout           = StructOption<0x1005, TimeVal>; 
         /// SO_RCVTIMEO option
-        using RecvTimeout           = StructOption<0x1006, ::timeval>;
+        using RecvTimeout           = StructOption<0x1006, TimeVal>;
         /// SO_ERROR option
         using GetAndClearError      = ValueOption<0x1007, uint8_t, uint32_t>;
         /// SO_TYPE option
@@ -374,7 +361,8 @@ public:
      *       ...
      *   }
      * ```
-     * 
+     * @tparam Option one of types declared in WiFiSocket::Option 
+     * @param option value to set
      * @returns success flag. Check lastError() for more information about failure
     */
     template<class Option>
@@ -398,6 +386,8 @@ public:
      *   }
      * ```
      * 
+     * @tparam Option one of types declared in WiFiSocket::Option 
+     * @param option value to fill in
      * @returns success flag. Check lastError() for more information about failure
     */
     template<class Option>
@@ -408,6 +398,8 @@ public:
             opt.resize(size);
         return ret;
     }
+
+    bool getPeerName(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
 
     /**
      * Retrieves underlying socket handle

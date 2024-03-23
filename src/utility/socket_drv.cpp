@@ -769,3 +769,55 @@ bool SocketDrv::getsockopt(uint8_t s, uint32_t optionName, void * option, uint8_
     }
 }
 
+bool SocketDrv::getPeerName(uint8_t s, arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
+    g_lastError.reset();
+    if (!SpiDrv::initialized)
+		SpiDrv::begin();
+
+    uint8_t cmd = SOCKET_GETPEERNAME_CMD;
+
+    {
+        SelectSlave sel;
+        
+        // Send Command
+        int commandSize = 4;
+        SpiDrv::sendCmd(cmd, PARAM_NUMS_1);
+        SpiDrv::sendParam(&s, sizeof(s), LAST_PARAM);
+        commandSize += (1 + sizeof(s));
+        
+        // pad to multiple of 4
+        while (commandSize % 4) {
+            SpiDrv::readChar();
+            commandSize++;
+        }
+    }
+    {
+        //Wait the reply elaboration
+        SelectSlave sel;
+    
+        // Wait for reply
+        uint8_t res;
+        uint8_t remoteIpBuf[4];
+        uint16_t remotePortTmp;
+        tParam params[PARAM_NUMS_3] = { 
+            {0, (char*)&res}, 
+            {0, (char*)&remoteIpBuf},  
+            {0, (char*)&remotePortTmp}
+        };
+        if (!SpiDrv::waitResponseParams(cmd, PARAM_NUMS_3, params)) {
+            WARN("error waitResponse");
+            g_lastError = SocketDrv::Failure;
+            return -1;
+        }
+
+        if (res) {
+            g_lastError = 0;
+            remoteIpAddress = IPAddress(arduino::IPv4, remoteIpBuf); //buf is in network order
+            remotePort = remotePortTmp; //port is in host order
+            return true;
+        }
+
+        return false;
+    }
+}
+
