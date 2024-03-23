@@ -94,6 +94,7 @@ public:
         SpiFailure = SocketDrv::Failure
     };
 
+private:
     /// Any numeric/boolean valued socket option
     template<uint32_t Name, class ExternalType, class StorageType = ExternalType> 
     class ValueOption {
@@ -139,6 +140,7 @@ public:
         void resize(uint8_t size) {}
     };
 
+public:
     struct TimeVal {
         long long	tv_sec;		
 	    long	    tv_usec;
@@ -188,7 +190,8 @@ public:
      * Their ranges are guaranteed to be distinct.
      * In case of success the value is 0.
     */
-    static uint8_t lastError();
+    static uint8_t lastError()
+        { return SocketDrv::lastError(); }
 
     /// Creates an invalid socket
     WiFiSocket() = default;
@@ -200,7 +203,9 @@ public:
      * In case of failure the socket is created as invalid which
      * can be tested via operator bool.
     */
-    WiFiSocket(Type type, Protocol proto);
+    WiFiSocket(Type type, Protocol proto):
+        m_handle(SocketDrv::socket(uint8_t(type), uint8_t(proto)))
+    {}
 
     /// Closes the socket
     ~WiFiSocket() {
@@ -253,13 +258,15 @@ public:
      * Binds a socket to given port
      * @returns success flag. Check lastError() for more information about failure
     */
-    bool bind(uint16_t port);
+    bool bind(uint16_t port)
+        { return SocketDrv::bind(m_handle, port); }
 
     /**
      * Starts listening for incoming connections
      * @returns success flag. Check lastError() for more information about failure
     */
-    bool listen(uint8_t backlog);
+    bool listen(uint8_t backlog)
+        { return SocketDrv::listen(m_handle, backlog); }
 
     /**
      * Accepts an incoming connection
@@ -270,7 +277,8 @@ public:
      * @param remoteIpAddress if successful populated by the address of the remote client
      * @param remotePort if successful populated by the port of the remote client
     */
-    WiFiSocket accept(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
+    WiFiSocket accept(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort)
+        { return WiFiSocket(SocketDrv::accept(m_handle, remoteIpAddress, remotePort)); }
 
     /**
      * Connects a socket to remote endpoint
@@ -279,7 +287,8 @@ public:
      * @param ipAddress host to connect to
      * @param port port to connect to
     */
-    bool connect(const arduino::IPAddress & ipAddress, uint16_t port);
+    bool connect(const arduino::IPAddress & ipAddress, uint16_t port)
+        { return SocketDrv::connect(m_handle, ipAddress, port); }
 
 
     /**
@@ -399,7 +408,8 @@ public:
         return ret;
     }
 
-    bool getPeerName(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
+    bool getPeerName(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort)
+        { return SocketDrv::getPeerName(m_handle, remoteIpAddress, remotePort); }
 
     /**
      * Retrieves underlying socket handle

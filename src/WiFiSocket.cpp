@@ -25,16 +25,6 @@
 #include "WiFiSocket.h"
 
 
-uint8_t WiFiSocket::lastError() {
-    return SocketDrv::lastError();
-}
-
-
-WiFiSocket::WiFiSocket(Type type, Protocol proto):
-    m_handle(SocketDrv::socket(uint8_t(type), uint8_t(proto)))
-{
-}
-
 void WiFiSocket::close() {
     if (m_handle != s_invalidHandle) {
         SocketDrv::close(m_handle);
@@ -42,22 +32,6 @@ void WiFiSocket::close() {
     }
 }
 
-bool WiFiSocket::bind(uint16_t port) {
-    return SocketDrv::bind(m_handle, port);
-}
-
-bool WiFiSocket::listen(uint8_t backlog) {
-    return SocketDrv::listen(m_handle, backlog);
-}
-
-WiFiSocket WiFiSocket::accept(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
-    auto res = SocketDrv::accept(m_handle, remoteIpAddress, remotePort);
-    return WiFiSocket(res);
-}
-
-bool WiFiSocket::connect(const arduino::IPAddress & ipAddress, uint16_t port) {
-    return SocketDrv::connect(m_handle, ipAddress, port);
-}
 
 int32_t WiFiSocket::send(const void * buf, uint16_t size) {
     auto ret = SocketDrv::send(m_handle, buf, size);
@@ -111,8 +85,4 @@ bool WiFiSocket::poll(State & state) const {
         return false;
     state = State(res);
     return true;
-}
-
-bool WiFiSocket::getPeerName(arduino::IPAddress & remoteIpAddress, uint16_t & remotePort) {
-    return SocketDrv::getPeerName(m_handle, remoteIpAddress, remotePort);
 }
