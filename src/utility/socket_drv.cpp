@@ -677,3 +677,95 @@ SocketDrv::SocketState SocketDrv::poll(uint8_t s) {
     }
 }
 
+bool SocketDrv::setsockopt(uint8_t s, uint32_t optionName, const void * option, uint8_t optLen) {
+    g_lastError.reset();
+    if (!SpiDrv::initialized)
+		SpiDrv::begin();
+
+    uint8_t cmd = SOCKET_SETSOCKOPT_CMD;
+
+    {
+        SelectSlave sel;
+        
+        // Send Command
+        int commandSize = 4;
+        SpiDrv::sendCmd(cmd, PARAM_NUMS_3);
+        SpiDrv::sendParam(&s, sizeof(s), NO_LAST_PARAM);
+        commandSize += (1 + sizeof(s));
+        SpiDrv::sendParam((uint8_t*)&optionName, sizeof(optionName), NO_LAST_PARAM);
+        commandSize += (1 + sizeof(optionName));
+        SpiDrv::sendParam((uint8_t *)option, optLen, LAST_PARAM);
+        commandSize += (1 + optLen);
+        
+        // pad to multiple of 4
+        while (commandSize % 4) {
+            SpiDrv::readChar();
+            commandSize++;
+        }
+    }
+    {
+        //Wait the reply elaboration
+        SelectSlave sel;
+    
+        // Wait for reply
+        uint8_t data = 0;
+        uint8_t dataLen = 0;
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, &data, &dataLen)) {
+            WARN("error waitResponse");
+            g_lastError = SocketDrv::Failure;
+            return false;
+        }
+
+        if (data != 0) {
+            g_lastError = 0;
+            return true;
+        }
+        return false;
+    }
+}
+
+bool SocketDrv::getsockopt(uint8_t s, uint32_t optionName, void * option, uint8_t & optLen) {
+    g_lastError.reset();
+    if (!SpiDrv::initialized)
+		SpiDrv::begin();
+
+    uint8_t cmd = SOCKET_GETSOCKOPT_CMD;
+
+    {
+        SelectSlave sel;
+        
+        // Send Command
+        int commandSize = 4;
+        SpiDrv::sendCmd(cmd, PARAM_NUMS_3);
+        SpiDrv::sendParam(&s, sizeof(s), NO_LAST_PARAM);
+        commandSize += (1 + sizeof(s));
+        SpiDrv::sendParam((uint8_t*)&optionName, sizeof(optionName), NO_LAST_PARAM);
+        commandSize += (1 + sizeof(optionName));
+        SpiDrv::sendParam((uint8_t *)&optLen, sizeof(optLen), LAST_PARAM);
+        commandSize += (1 + sizeof(optLen));
+        
+        // pad to multiple of 4
+        while (commandSize % 4) {
+            SpiDrv::readChar();
+            commandSize++;
+        }
+    }
+    {
+        //Wait the reply elaboration
+        SelectSlave sel;
+    
+        // Wait for reply
+        if (!SpiDrv::waitResponseCmd(cmd, PARAM_NUMS_1, (uint8_t *)option, &optLen)) {
+            WARN("error waitResponse");
+            g_lastError = SocketDrv::Failure;
+            return false;
+        }
+
+        if (optLen != 0) {
+            g_lastError = 0;
+            return true;
+        }
+        return false;
+    }
+}
+

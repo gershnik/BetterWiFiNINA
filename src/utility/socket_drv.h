@@ -57,7 +57,8 @@ namespace SocketDrv {
     int32_t recvFrom(uint8_t s, void * buf, uint16_t size, arduino::IPAddress & remoteIpAddress, uint16_t & remotePort);
     uint8_t ioctl(uint8_t s, uint32_t code, void * buf, uint8_t bufSize);
     SocketState poll(uint8_t s);
-
+    bool setsockopt(uint8_t s, uint32_t optionName, const void * option, uint8_t optLen);
+    bool getsockopt(uint8_t s, uint32_t optionName, void * option, uint8_t & optLen);
 }
 
 

@@ -94,6 +94,35 @@ public:
         SpiFailure = SocketDrv::Failure
     };
 
+
+    /// @brief Any boolean valued socket option
+    template<uint32_t Name> class BooleanOption {
+    public:
+        static constexpr uint32_t name = Name;  
+
+        BooleanOption() : m_value(0) {}
+        BooleanOption(bool val): m_value(val) {}
+
+        explicit operator bool() const 
+            { return m_value != 0;}
+        bool value() const 
+            { return m_value != 0;}
+
+        const void * data() const { return &m_value; }
+        void * data() { return &m_value; }
+        uint8_t size() const { return sizeof(m_value); }
+
+        void resize(uint8_t size) {}
+    private:
+        uint32_t m_value;
+    };
+
+    /// @brief Available socket options types
+    struct Option {
+        /// @brief SO_REUSEADDR option
+        using ReuseAddress = BooleanOption<0x0004>;
+    };
+
 private:
     enum class IOControl : uint32_t {
         //see lwip/sockets.h
@@ -269,6 +298,55 @@ public:
      * 
     */
     bool poll(State & state) const;
+
+    /**
+     * Sets a socket option
+     * 
+     * Only a small subset of SO_SOCKET options are supported.
+     * These are represented by strongly typed values of types
+     * declared in Option struct.
+     * 
+     * For example here is how to set ReuseAddress option:
+     * 
+     * ```
+     *   if (socket.setOption(WiFiSocket::Option::ReuseAddress(true))) {
+     *       ...
+     *   }
+     * ```
+     * 
+     * @returns success flag. Check lastError() for more information about failure
+    */
+    template<class Option>
+    inline bool setOption(const Option & opt) {
+        return SocketDrv::setsockopt(m_handle, opt.name, opt.data(), opt.size());
+    }
+
+    /**
+     * Reads a socket option
+     * 
+     * Only a small subset of SO_SOCKET options are supported.
+     * These are represented by strongly typed values of types
+     * declared in Option struct.
+     * 
+     * For example here is how to read ReuseAddress option:
+     * 
+     * ```
+     *   WiFiSocket::Option::ReuseAddress reuseAddress;
+     *   if (socket.setOption(reuseAddress)) {
+     *       ...
+     *   }
+     * ```
+     * 
+     * @returns success flag. Check lastError() for more information about failure
+    */
+    template<class Option>
+    inline bool getOption(Option & opt) {
+        uint8_t size = opt.size();
+        bool ret = SocketDrv::getsockopt(m_handle, opt.name, opt.data(), size);
+        if (ret)
+            opt.resize(size);
+        return ret;
+    }
 
     /**
      * Retrieves underlying socket handle
