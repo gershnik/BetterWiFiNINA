@@ -386,7 +386,7 @@ public:
      * 
      * ```
      *   WiFiSocket::Option::ReuseAddress reuseAddress;
-     *   if (socket.setOption(reuseAddress)) {
+     *   if (socket.getOption(reuseAddress)) {
      *       ...
      *   }
      * ```
