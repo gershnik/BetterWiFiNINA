@@ -1,8 +1,8 @@
 # BetterWiFiNINA
 
-[![Check Arduino status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/check-arduino.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/check-arduino.yml")
-[![Compile Examples status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/compile-examples.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/compile-examples.yml")
-[![Spell Check status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/spell-check.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/spell-check.yml")
+[![Check Arduino status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/check-arduino.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/check-arduino.yml)
+[![Compile Examples status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/compile-examples.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/compile-examples.yml)
+[![Spell Check status](https://github.com/gershnik/BetterWiFiNina/actions/workflows/spell-check.yml/badge.svg)](https://github.com/gershnik/BetterWiFiNina/actions/workflows/spell-check.yml)
 
 
 <!-- Links -->
