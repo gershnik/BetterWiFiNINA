@@ -1,5 +1,5 @@
 #######################################
-# Syntax Coloring Map For WiFiNINA
+# Syntax Coloring Map For BetterWiFiNINA
 #######################################
 
 #######################################
@@ -12,6 +12,7 @@ WiFiUdp	KEYWORD1
 WiFiClient	KEYWORD1
 WiFiSSLClient	KEYWORD1
 WiFiServer	KEYWORD1
+WiFiSocket  KEYWORD1
 WiFiUDP	KEYWORD1
 
 
@@ -57,6 +58,23 @@ noLowPowerMode	KEYWORD2
 ping	KEYWORD2
 beginMulticast	KEYWORD2
 setTimeout	KEYWORD2
+
+lastError   KEYWORD2
+close   KEYWORD2
+bind    KEYWORD2
+listen  KEYWORD2
+accept  KEYWORD2
+send    KEYWORD2
+recv    KEYWORD2
+sendTo  KEYWORD2
+recvFrom    KEYWORD2
+setNonBlocking  KEYWORD2
+availableToRead KEYWORD2
+poll    KEYWORD2
+setOption   KEYWORD2
+getOption   KEYWORD2
+getPeerName KEYWORD2
+
 
 
 #######################################
