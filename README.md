@@ -15,7 +15,7 @@
 
 <!-- End Links -->
 
-This is a for of [WiFiNINA][wifinina] library that attempts to improve it and fix longstanding issues
+This is a fork of [WiFiNINA][wifinina] library that attempts to improve it and fix longstanding issues
 to make it usable for more serious network communication needs.
 
 Currently it **does not** require any custom NINA firmware. Regular NINA firmware 1.5 or above will work.

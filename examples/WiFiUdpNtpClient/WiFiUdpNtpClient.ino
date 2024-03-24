@@ -16,7 +16,7 @@
  */
 
 #include <SPI.h>
-#include <WiFiNINA.h>
+#include <BetterWiFiNINA.h>
 #include <WiFiUdp.h>
 
 int status = WL_IDLE_STATUS;

@@ -9,7 +9,7 @@
  * This code is in the public domain.
  */
 #include <SPI.h>
-#include <WiFiNINA.h>
+#include <BetterWiFiNINA.h>
 
 void setup() {
   // Initialize serial

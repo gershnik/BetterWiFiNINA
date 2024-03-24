@@ -15,7 +15,7 @@
  */
 
 #include <SPI.h>
-#include <WiFiNINA.h>
+#include <BetterWiFiNINA.h>
 
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
