@@ -1,0 +1,45 @@
+name: Make Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get release Name
+        shell: python
+        run: |
+          import os
+          ref = os.environ['GITHUB_REF']
+          name = ref[ref.rfind('/') + 2:]
+          with open(os.environ['GITHUB_ENV'], 'w') as env:
+            print('RELEASE_NAME=' + name, file=env) 
+
+      - name: Zip Library
+        shell: bash
+        run: |
+          mkdir build
+          tar -czf build/BetterWiFiNINA-${{ env.RELEASE_NAME }}.tar.gz \
+            --exclude-vcs --exclude-vcs-ignores --exclude='.github' --exclude='.tools' --exclude='build' --exclude='.codespellrc' \
+            .
+
+      - name: Make release
+        uses: softprops/action-gh-release@v1
+        id: create_release
+        with:
+          draft: true
+          prerelease: false
+          name: ${{ env.RELEASE_NAME }}
+          body: ...edit me...
+          files: |
+            build/BetterWiFiNINA-${{ env.RELEASE_NAME }}.tar.gz
+          
+      
