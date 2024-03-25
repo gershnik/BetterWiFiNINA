@@ -63,7 +63,7 @@ is your only option.
 
 ## Docs and examples
 
-The docs and examples for this library are still the ones from WiFiNina. Updating/converting them is a work in progress
+The docs and examples for this library are still the ones from WiFiNINA. Updating/converting them is a work in progress
 
 
 ## License
