@@ -53,7 +53,7 @@ exposed the way plain sockets are. Client-only means that you can connect to SSL
 server. It also must be mentioned that to manage SSL certificate trust you need to go through a cumbersome process of uploading
 trusted root certificates to the NINA chip.
 
-Fortunately, as long as your Arduino board software is [Mbed OS based] there is usually a better way. Mbed OS includes 
+Fortunately, as long as your Arduino board software is [Mbed OS based][mbedos-arduino] there is usually a better way. Mbed OS includes 
 [Mbed TLS][mbed-tls] which is the same library NINA firmware uses to provide SSL functionality. It is relatively straightforward
 to integrate Mbed TLS (via custom BIO) with `WiFiSocket` and voila - you now have an ability to run *both* SSL servers and clients
 with certificates and trust under your full control. A document describing how to do it in more detail is upcoming.
