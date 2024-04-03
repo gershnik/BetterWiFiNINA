@@ -12,6 +12,7 @@
 [no-client-and-server]: https://www.reddit.com/r/arduino/comments/exc3hd/wifinina_server_and_client_simultaneously/
 [mbedos-arduino]: https://docs.arduino.cc/software/ide-v1/tutorials/getting-started/cores/arduino-mbed_nano
 [mbed-tls]: https://www.trustedfirmware.org/projects/mbed-tls/
+[rp2040-https]: https://gershnik.github.io/2024/04/03/https-arduino-nano-rp2040.html
 
 <!-- End Links -->
 
@@ -56,7 +57,8 @@ trusted root certificates to the NINA chip.
 Fortunately, as long as your Arduino board software is [Mbed OS based][mbedos-arduino] there is usually a better way. Mbed OS includes 
 [Mbed TLS][mbed-tls] which is the same library NINA firmware uses to provide SSL functionality. It is relatively straightforward
 to integrate Mbed TLS (via custom BIO) with `WiFiSocket` and voila - you now have an ability to run *both* SSL servers and clients
-with certificates and trust under your full control. A document describing how to do it in more detail is upcoming.
+with certificates and trust under your full control. [This article][rp2040-https] describes how to do so on Nano RP2040 Connect board.
+It should be possible to easily extend the approach shown there to any other Mbed OS based board.
 
 If your board is not Mbed OS based then, as far as I know, you are out of luck and using `WiFiSSLClient` with all its limitations
 is your only option.
