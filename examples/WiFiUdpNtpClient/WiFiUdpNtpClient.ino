@@ -2,22 +2,16 @@
  Udp NTP Client
 
  Get the time from a Network Time Protocol (NTP) time server
- Demonstrates use of UDP sendPacket and ReceivePacket
+ Demonstrates use of WiFiSocket for UDP
  For more on NTP time servers and the messages needed to communicate with them,
  see http://en.wikipedia.org/wiki/Network_Time_Protocol
-
- created 4 Sep 2010
- by Michael Margolis
- modified 9 Apr 2012
- by Tom Igoe
-
+ 
  This code is in the public domain.
 
  */
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
-#include <WiFiUdp.h>
 
 int status = WL_IDLE_STATUS;
 #include "arduino_secrets.h" 
@@ -34,8 +28,7 @@ const int NTP_PACKET_SIZE = 48; // NTP timestamp is in the first 48 bytes of the
 
 byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
 
-// A UDP instance to let us send and receive packets over UDP
-WiFiUDP Udp;
+WiFiSocket udpSocket;
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -71,18 +64,39 @@ void setup() {
   printWifiStatus();
 
   Serial.println("\nStarting connection to server...");
-  Udp.begin(localPort);
+
+  // create server socket
+  udpSocket = WiFiSocket(WiFiSocket::Type::DGram, WiFiSocket::Protocol::UDP);
+  if (!udpSocket) {
+    Serial.print("Creating UDP socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+  //Bind to localPort
+  if (!udpSocket.bind(localPort)) {
+    Serial.print("Binding server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
 }
 
 void loop() {
-  sendNTPpacket(timeServer); // send an NTP packet to a time server
+  if (!sendNTPpacket(timeServer)) { // send an NTP packet to a time server
+    // wait ten seconds before asking for the time again
+    delay(10000);
+    return;
+  }
+  
   // wait to see if a reply is available
   delay(1000);
-  if (Udp.parsePacket()) {
-    Serial.println("packet received");
-    // We've received a packet, read the data from it
-    Udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
 
+  // read the packet into the buffer
+  arduino::IPAddress addr;
+  uint16_t port;
+  auto read = udpSocket.recvFrom(packetBuffer, NTP_PACKET_SIZE, addr, port);
+  if (addr == timeServer && read == NTP_PACKET_SIZE) {
     //the timestamp starts at byte 40 of the received packet and is four bytes,
     // or two words, long. First, extract the two words:
 
@@ -120,12 +134,13 @@ void loop() {
     }
     Serial.println(epoch % 60); // print the second
   }
+  
   // wait ten seconds before asking for the time again
   delay(10000);
 }
 
 // send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(IPAddress& address) {
+bool sendNTPpacket(IPAddress& address) {
   //Serial.println("1");
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
@@ -142,16 +157,16 @@ unsigned long sendNTPpacket(IPAddress& address) {
   packetBuffer[14]  = 49;
   packetBuffer[15]  = 52;
 
-  //Serial.println("3");
-
   // all NTP fields have been given values, now
   // you can send a packet requesting a timestamp:
-  Udp.beginPacket(address, 123); //NTP requests are to port 123
-  //Serial.println("4");
-  Udp.write(packetBuffer, NTP_PACKET_SIZE);
-  //Serial.println("5");
-  Udp.endPacket();
-  //Serial.println("6");
+  auto sent = udpSocket.sendTo(packetBuffer, NTP_PACKET_SIZE, 
+                                address, 123); //NTP requests are to port 123
+  if (sent < 0) {
+    Serial.print("sendTo socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    return false;
+  }
+  return true;
 }
 
 

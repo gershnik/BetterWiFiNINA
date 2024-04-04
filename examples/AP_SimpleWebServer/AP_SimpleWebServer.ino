@@ -83,12 +83,16 @@ void setup() {
   if (!serverSocket.bind(80)) {
     Serial.print("Binding server socket failed: error ");
     Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
   }
 
   //And start listening
   if (!serverSocket.listen(5)) {
     Serial.print("Listen on server socket failed: error ");
     Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
   }
 }
 
@@ -113,7 +117,7 @@ void loop() {
   uint16_t port;
   auto sessionSocket = serverSocket.accept(addr, port);
   if (!sessionSocket) {
-    Serial.println("Accept on server socket failed: error ");
+    Serial.print("Accept on server socket failed: error ");
     Serial.println(WiFiSocket::lastError());
     delay(100);
     return;
@@ -123,7 +127,7 @@ void loop() {
 
   //set the session socket to non-blocking
   if (!sessionSocket.setNonBlocking(true))  {
-    Serial.println("Setting socket to non-blocking failed: error ");
+    Serial.print("Setting socket to non-blocking failed: error ");
     Serial.println(WiFiSocket::lastError());
     delay(100);
     return;
@@ -140,7 +144,7 @@ void loop() {
       auto err = WiFiSocket::lastError();
       if (err == EWOULDBLOCK)
         continue;
-      Serial.println("reading from socket failed with error: ");
+      Serial.print("reading from socket failed with error: ");
       Serial.println(err);
       delay(100);
       return;
@@ -190,7 +194,7 @@ void loop() {
       auto err = WiFiSocket::lastError();
       if (err == EWOULDBLOCK)
         continue;
-      Serial.println("writing to socket failed with error: ");
+      Serial.print("writing to socket failed with error: ");
       Serial.println(err);
       delay(100);
       return;

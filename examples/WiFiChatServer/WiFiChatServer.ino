@@ -12,15 +12,11 @@
  Circuit:
  * Board with NINA module (Arduino MKR WiFi 1010, MKR VIDOR 4000 and Uno WiFi Rev.2)
 
- created 18 Dec 2009
- by David A. Mellis
- modified 31 May 2012
- by Tom Igoe
-
  */
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
+#include <errno.h>
 
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
@@ -31,9 +27,14 @@ int keyIndex = 0;            // your network key index number (needed only for W
 
 int status = WL_IDLE_STATUS;
 
-WiFiServer server(23);
+struct ChatClient {
+  String toWrite;     //content that needs to be written to this client
+  WiFiSocket socket;  //client's socket
+};
 
-boolean alreadyConnected = false; // whether or not the client was connected previously
+WiFiSocket serverSocket;
+ChatClient clients[32] = {};
+uint32_t freeClientBitmask = 0;  //bitmaks of which of the clients array is free
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -65,37 +66,165 @@ void setup() {
     delay(10000);
   }
 
-  // start the server:
-  server.begin();
   // you're connected now, so print out the status:
   printWifiStatus();
+
+  // create server socket
+  serverSocket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
+  if (!serverSocket) {
+    Serial.print("Creating server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+  //Bind to port 23
+  if (!serverSocket.bind(23)) {
+    Serial.print("Binding server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+
+  //set the server socket to non-blocking
+  if (!serverSocket.setNonBlocking(true))  {
+    Serial.println("Setting server socket to non-blocking failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+
+  //And start listening
+  if (!serverSocket.listen(5)) {
+    Serial.print("Listen on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
 }
 
 
-void loop() {
-  // wait for a new client:
-  WiFiClient client = server.available();
+void acceptConnectionIfPossible() {
 
+  //no clear bits => we cannot accept more connections
+  if (freeClientBitmask == uint32_t(-1))
+    return;
 
-  // when the client sends the first byte, say hello:
-  if (client) {
-    if (!alreadyConnected) {
-      // clear out the input buffer:
-      client.flush();
-      Serial.println("We have a new client");
-      client.println("Hello, client!");
-      alreadyConnected = true;
-    }
+  //find first clear bit in freeClientBitmask
+  //see https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
+  //for explantation how this works
+  uint32_t firstClearBit = __builtin_clzl(~freeClientBitmask);
 
-    if (client.available() > 0) {
-      // read the bytes incoming from the client:
-      char thisChar = client.read();
-      // echo the bytes back to the client:
-      server.write(thisChar);
-      // echo the bytes to the server as well:
-      Serial.write(thisChar);
+  //Accept incoming connection
+  IPAddress addr;
+  uint16_t port;
+  auto acceptedSocket = serverSocket.accept(addr, port);
+  if (!acceptedSocket) {
+    auto err = WiFiSocket::lastError();
+    if (err == EWOULDBLOCK)
+      return;
+    Serial.print("Accept on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
+
+  //set the session socket to non-blocking
+  if (!acceptedSocket.setNonBlocking(true))  {
+    Serial.print("Setting socket to non-blocking failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
+
+  Serial.print("We have a new client: ");
+  Serial.println(firstClearBit);
+
+  clients[firstClearBit] = { 
+    .toWrite = "Hello, client!",
+    .socket = static_cast<WiFiSocket &&>(acceptedSocket)
+  };
+  freeClientBitmask |= (uint32_t(1) << (31 - firstClearBit));
+}
+
+void writeToIfNeeded(size_t clientIdx) {
+  const uint32_t clientBit = uint32_t(1) << (31 - clientIdx);
+
+  if ((freeClientBitmask & clientBit) == 0)
+    return;
+  
+  auto & client = clients[clientIdx];
+  if (client.toWrite.length() == 0)
+    return;
+
+  auto sent = client.socket.send(client.toWrite.c_str(), client.toWrite.length());
+  if (sent < 0) {
+    auto err = WiFiSocket::lastError();
+    if (err == EWOULDBLOCK)
+      return;
+
+    Serial.print("writing to client ");
+    Serial.print(clientIdx);
+    Serial.print(" failed with error: ");
+    Serial.println(err);
+
+    client.socket.close();
+    freeClientBitmask &= ~clientBit;
+    return;
+  }
+  client.toWrite.remove(0, sent);
+}
+
+void readFromIfPossible(size_t clientIdx) {
+  const uint32_t clientBit = uint32_t(1) << (31 - clientIdx);
+
+  if ((freeClientBitmask & clientBit) == 0)
+    return;
+
+  auto & client = clients[clientIdx];
+
+  char buffer[256];
+  auto read = client.socket.recv(buffer, sizeof(buffer));
+  if (read < 0) {
+    auto err = WiFiSocket::lastError();
+    if (err == EWOULDBLOCK)
+      return;
+    Serial.print("reading from client ");
+    Serial.print(clientIdx);
+    Serial.print(" failed with error: ");
+    Serial.println(err);
+    
+    client.socket.close();
+    freeClientBitmask &= ~clientBit;
+    return;
+  }
+
+  if (read == 0)
+    return;
+
+  Serial.write(buffer, read); // print what we read to the serial monitor
+
+  //add the message to other active clients' send buffers
+  for(size_t otherClientIdx = 0; otherClientIdx < sizeof(clients)/sizeof(clients[0]); ++otherClientIdx) {
+    if (otherClientIdx == clientIdx)
+      continue;
+    auto & otherClient = clients[otherClientIdx];
+    if (otherClient.socket) {
+      otherClient.toWrite.concat(buffer, read);
     }
   }
+}
+
+void loop() {
+
+  acceptConnectionIfPossible();
+
+  for(size_t clientIdx = 0; clientIdx < sizeof(clients)/sizeof(clients[0]); ++clientIdx) {
+    writeToIfNeeded(clientIdx);
+  }
+  for(size_t clientIdx = 0; clientIdx < sizeof(clients)/sizeof(clients[0]); ++clientIdx) {
+    readFromIfPossible(clientIdx);
+  }
+
 }
 
 
