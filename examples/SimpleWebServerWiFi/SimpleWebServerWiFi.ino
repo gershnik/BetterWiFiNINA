@@ -16,12 +16,13 @@
  Circuit:
  * Board with NINA module (Arduino MKR WiFi 1010, MKR VIDOR 4000 and Uno WiFi Rev.2)
  * LED attached to pin 9
-
- created 25 Nov 2012
- by Tom Igoe
+ 
  */
+
+
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
+#include <errno.h>
 
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
@@ -30,7 +31,7 @@ char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as k
 int keyIndex = 0;                 // your network key index number (needed only for WEP)
 
 int status = WL_IDLE_STATUS;
-WiFiServer server(80);
+WiFiSocket serverSocket;
 
 void setup() {
   Serial.begin(9600);      // initialize serial communication
@@ -58,60 +59,122 @@ void setup() {
     // wait 10 seconds for connection:
     delay(10000);
   }
-  server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status
+
+  // create server socket
+  serverSocket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
+  if (!serverSocket) {
+    Serial.print("Creating server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+  //Bind to port 80
+  if (!serverSocket.bind(80)) {
+    Serial.print("Binding server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+  }
+
+  //And start listening
+  if (!serverSocket.listen(5)) {
+    Serial.print("Listen on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+  }
 }
 
 
 void loop() {
-  WiFiClient client = server.available();   // listen for incoming clients
+  //Accept incoming connection
+  IPAddress addr;
+  uint16_t port;
+  auto sessionSocket = serverSocket.accept(addr, port);
+  if (!sessionSocket) {
+    Serial.println("Accept on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
 
-  if (client) {                             // if you get a client,
-    Serial.println("new client");           // print a message out the serial port
-    String currentLine = "";                // make a String to hold incoming data from the client
-    while (client.connected()) {            // loop while the client's connected
-      if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out to the serial monitor
-        if (c == '\n') {                    // if the byte is a newline character
+  Serial.println("new client");
 
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 0) {
-            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-            // and a content-type so the client knows what's coming, then a blank line:
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
+  //set the session socket to non-blocking
+  if (!sessionSocket.setNonBlocking(true))  {
+    Serial.println("Setting socket to non-blocking failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
 
-            // the content of the HTTP response follows the header:
-            client.print("Click <a href=\"/H\">here</a> turn the LED on pin 9 on<br>");
-            client.print("Click <a href=\"/L\">here</a> turn the LED on pin 9 off<br>");
+  uint8_t buffer[256];       // a buffer to read to
+  String currentLine = "";   // a String to hold each request line from the client
+  bool doneReading = false;
 
-            // The HTTP response ends with another blank line:
-            client.println();
-            // break out of the while loop:
-            break;
-          } else {    // if you got a newline, then clear currentLine:
-            currentLine = "";
-          }
-        } else if (c != '\r') {  // if you got anything else but a carriage return character,
-          currentLine += c;      // add it to the end of the currentLine
+  //read until \n\r\n
+  while(!doneReading) {
+    auto read = sessionSocket.recv(buffer, sizeof(buffer));
+    if (read < 0) {
+      auto err = WiFiSocket::lastError();
+      if (err == EWOULDBLOCK)
+        continue;
+      Serial.println("reading from socket failed with error: ");
+      Serial.println(err);
+      delay(100);
+      return;
+    }
+    Serial.write(buffer, read); // print it out to the serial monitor
+    for(int i = 0; i != read; ++i) {
+      char c = buffer[i];
+      if (c == '\n') {                    // if the byte is a newline character
+        // if the current line is blank, you got two newline characters in a row.
+        // that's the end of the client HTTP request, so send a response:
+        if (currentLine.length() == 0) {
+          doneReading = true;
+          break;
+        } else {      // if you got a newline, then clear currentLine:
+          currentLine = "";
         }
+      } else if (c != '\r') {    // if you got anything else but a carriage return character,
+        currentLine += c;      // add it to the end of the currentLine
+      }
 
-        // Check to see if the client request was "GET /H" or "GET /L":
-        if (currentLine.endsWith("GET /H")) {
-          digitalWrite(LED_BUILTIN, HIGH);               // GET /H turns the LED on
-        }
-        if (currentLine.endsWith("GET /L")) {
-          digitalWrite(LED_BUILTIN, LOW);                // GET /L turns the LED off
-        }
+      // Check to see if the client request was "GET /H" or "GET /L":
+      if (currentLine.endsWith("GET /H")) {
+        digitalWrite(LED_BUILTIN, HIGH);               // GET /H turns the LED on
+      }
+      if (currentLine.endsWith("GET /L")) {
+        digitalWrite(LED_BUILTIN, LOW);                // GET /L turns the LED off
       }
     }
-    // close the connection:
-    client.stop();
-    Serial.println("client disconnected");
   }
+
+  //Our response
+  static const char response[] = 
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Type: text/html\r\n"
+      "Connection: close\r\n"
+      "\r\n"
+      "<!DOCTYPE HTML>\n"
+      "<html><body>"
+      "Click <a href=\"/H\">here</a> turn the LED on pin 9 on<br>"
+      "Click <a href=\"/L\">here</a> turn the LED on pin 9 off<br>"
+      "</body></html>";
+
+  size_t written = 0;
+  while(written != sizeof(response)) {
+    auto sent = sessionSocket.send(response + written, sizeof(response) - written);
+    if (sent < 0) {
+      auto err = WiFiSocket::lastError();
+      if (err == EWOULDBLOCK)
+        continue;
+      Serial.println("writing to socket failed with error: ");
+      Serial.println(err);
+      delay(100);
+      return;
+    }
+    written += sent;
+  }
+
+  Serial.println("response sent");
 }
 
 void printWifiStatus() {
