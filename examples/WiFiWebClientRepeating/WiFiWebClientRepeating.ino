@@ -3,19 +3,13 @@
 
  This sketch connects to a a web server and makes a request
  using a WiFi equipped Arduino board.
-
- created 23 April 2012
- modified 31 May 2012
- by Tom Igoe
- modified 13 Jan 2014
- by Federico Vanzati
-
- http://www.arduino.cc/en/Tutorial/WifiWebClientRepeating
+ 
  This code is in the public domain.
  */
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
+#include <errno.h>
 
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
@@ -25,8 +19,7 @@ int keyIndex = 0;            // your network key index number (needed only for W
 
 int status = WL_IDLE_STATUS;
 
-// Initialize the WiFi client library
-WiFiClient client;
+WiFiSocket socket;
 
 // server address:
 char server[] = "example.org";
@@ -69,12 +62,29 @@ void setup() {
 }
 
 void loop() {
-  // if there's incoming data from the net connection.
-  // send it out the serial port.  This is for debugging
+  // if the socket is valid read incoming data from the net connection.
+  // and send it out the serial port.  This is for debugging
   // purposes only:
-  while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
+  if (socket) {
+    char buf[256];
+
+    while( true ) {
+      auto read = socket.recv(buf, sizeof(buf));
+      if (read < 0) {
+        auto err = WiFiSocket::lastError();
+        if (err == ENOTCONN) {
+          Serial.println("Server disconnected");
+        } else {
+          Serial.print("Failed to read: error ");
+          Serial.println(WiFiSocket::lastError());
+        }
+        socket.close();
+        break;
+      } else {
+        //print the bytes we read
+        Serial.write(buf, read);
+      }
+    }
   }
 
   // if ten seconds have passed since your last connection,
@@ -87,26 +97,56 @@ void loop() {
 
 // this method makes a HTTP connection to the server:
 void httpRequest() {
-  // close any connection before send a new request.
-  // This will free the socket on the NINA module
-  client.stop();
-
-  // if there's a successful connection:
-  if (client.connect(server, 80)) {
-    Serial.println("connecting...");
-    // send the HTTP GET request:
-    client.println("GET / HTTP/1.1");
-    client.println("Host: example.org");
-    client.println("User-Agent: ArduinoWiFi/1.1");
-    client.println("Connection: close");
-    client.println();
-
-    // note the time that the connection was made:
-    lastConnectionTime = millis();
-  } else {
-    // if you couldn't make a connection:
-    Serial.println("connection failed");
+  //Create socket (this will close existing one)
+  socket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
+  if (!socket) {
+    Serial.print("Creating socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    return;
   }
+
+  //Resolve server address
+  IPAddress addr;
+  if (auto res = WiFi.hostByName(server, addr); res != 1) {
+    Serial.print("Unable to resolve: ");
+    Serial.print(server);
+    Serial.print(", error ");
+    Serial.println(res);
+    return;
+  }
+
+  //Connect to the server
+  if (!socket.connect(addr, 80)) {
+    Serial.print("Cannot connect to server: error ");
+    Serial.println(WiFiSocket::lastError());
+    socket.close();
+    return;
+  }
+
+  Serial.println("connected, sending...");
+
+  // send the HTTP GET request:
+  static const char request[] =
+    "GET / HTTP/1.1\r\n"
+    "Host: example.org\r\n"
+    "User-Agent: ArduinoWiFi/1.1\r\n"
+    "Connection: close\r\n"
+    "\r\n";
+
+  size_t written = 0;
+  while(written < sizeof(request) - 1) {
+    auto sent = socket.send(request + written, sizeof(request) - 1 - written);
+    if (sent < 0) {
+      Serial.print("Failed to send: error ");
+      Serial.println(WiFiSocket::lastError());
+      socket.close();
+      return;
+    }
+    written += sent;
+  }
+
+  // note the time that the connection was made:
+  lastConnectionTime = millis();
 }
 
 

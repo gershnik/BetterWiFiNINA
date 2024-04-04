@@ -86,6 +86,7 @@ void setup() {
     while (true);
   }
 
+  //Connect to the server
   if (!socket.connect(addr, 80)) {
     Serial.print("Cannot connect to server: error ");
     Serial.println(WiFiSocket::lastError());
