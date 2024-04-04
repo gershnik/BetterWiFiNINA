@@ -65,7 +65,7 @@ void setup() {
 
   Serial.println("\nStarting connection to server...");
 
-  // create server socket
+  //Create UDP socket
   udpSocket = WiFiSocket(WiFiSocket::Type::DGram, WiFiSocket::Protocol::UDP);
   if (!udpSocket) {
     Serial.print("Creating UDP socket failed: error ");
@@ -75,7 +75,7 @@ void setup() {
   }
   //Bind to localPort
   if (!udpSocket.bind(localPort)) {
-    Serial.print("Binding server socket failed: error ");
+    Serial.print("Binding UDP socket failed: error ");
     Serial.println(WiFiSocket::lastError());
     // don't continue
     while (true);

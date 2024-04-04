@@ -4,15 +4,11 @@
  This sketch waits for a UDP packet on localPort using the WiFi module.
  When a packet is received an Acknowledge packet is sent to the client on port remotePort
 
- created 30 December 2012
- by dlf (Metodo2 srl)
-
  */
 
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
-#include <WiFiUdp.h>
 
 int status = WL_IDLE_STATUS;
 #include "arduino_secrets.h" 
@@ -26,7 +22,7 @@ unsigned int localPort = 2390;      // local port to listen on
 char packetBuffer[256]; //buffer to hold incoming packet
 char  ReplyBuffer[] = "acknowledged";       // a string to send back
 
-WiFiUDP Udp;
+WiFiSocket udpSocket;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -62,34 +58,43 @@ void setup() {
 
   Serial.println("\nStarting connection to server...");
   // if you get a connection, report back via serial:
-  Udp.begin(localPort);
+  
+  //Create UDP socket
+  udpSocket = WiFiSocket(WiFiSocket::Type::DGram, WiFiSocket::Protocol::UDP);
+  if (!udpSocket) {
+    Serial.print("Creating UDP socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+  //Bind to localPort
+  if (!udpSocket.bind(localPort)) {
+    Serial.print("Binding UDP socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
 }
 
 void loop() {
 
-  // if there's data available, read a packet
-  int packetSize = Udp.parsePacket();
-  if (packetSize) {
+  // read the packet into packetBuffer
+  IPAddress remoteIp;
+  uint16_t remotePort;
+  auto packetSize = udpSocket.recvFrom(packetBuffer, sizeof(packetBuffer) - 1, remoteIp, remotePort);
+  if (packetSize > 0) {
     Serial.print("Received packet of size ");
     Serial.println(packetSize);
     Serial.print("From ");
-    IPAddress remoteIp = Udp.remoteIP();
     Serial.print(remoteIp);
     Serial.print(", port ");
-    Serial.println(Udp.remotePort());
-
-    // read the packet into packetBuffer
-    int len = Udp.read(packetBuffer, 255);
-    if (len > 0) {
-      packetBuffer[len] = 0;
-    }
+    Serial.println(remotePort);
+    packetBuffer[packetSize] = 0;
     Serial.println("Contents:");
     Serial.println(packetBuffer);
 
     // send a reply, to the IP address and port that sent us the packet we received
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-    Udp.write(ReplyBuffer);
-    Udp.endPacket();
+    udpSocket.sendTo(ReplyBuffer, sizeof(ReplyBuffer) - 1, remoteIp, remotePort);
   }
 }
 
