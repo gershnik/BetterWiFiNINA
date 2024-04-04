@@ -61,7 +61,7 @@ void setup() {
   }
   printWifiStatus();                        // you're connected now, so print out the status
 
-  // create server socket
+  //Create server socket
   serverSocket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
   if (!serverSocket) {
     Serial.print("Creating server socket failed: error ");

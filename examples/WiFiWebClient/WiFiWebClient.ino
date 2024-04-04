@@ -13,15 +13,12 @@
  Circuit:
  * Board with NINA module (Arduino MKR WiFi 1010, MKR VIDOR 4000 and Uno WiFi Rev.2)
 
- created 13 July 2010
- by dlf (Metodo2 srl)
- modified 31 May 2012
- by Tom Igoe
  */
 
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
+#include <errno.h>
 
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
@@ -35,10 +32,7 @@ int status = WL_IDLE_STATUS;
 //IPAddress server(74,125,232,128);  // numeric IP for Google (no DNS)
 char server[] = "www.google.com";    // name address for Google (using DNS)
 
-// Initialize the Ethernet client library
-// with the IP address and port of the server
-// that you want to connect to (port 80 is default for HTTP):
-WiFiClient client;
+WiFiSocket socket;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -72,35 +66,76 @@ void setup() {
   Serial.println("Connected to WiFi");
   printWifiStatus();
 
-  Serial.println("\nStarting connection to server...");
-  // if you get a connection, report back via serial:
-  if (client.connect(server, 80)) {
-    Serial.println("connected to server");
-    // Make a HTTP request:
-    client.println("GET /search?q=arduino HTTP/1.1");
-    client.println("Host: www.google.com");
-    client.println("Connection: close");
-    client.println();
+  //Resolve server address
+  IPAddress addr;
+  if (auto res = WiFi.hostByName(server, addr); res != 1) {
+    Serial.print("Unable to resolve: ");
+    Serial.print(server);
+    Serial.print(", error ");
+    Serial.println(res);
+    // don't continue
+    while (true);
+  }
+
+  //Create socket
+  socket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
+  if (!socket) {
+    Serial.print("Creating socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+
+  if (!socket.connect(addr, 80)) {
+    Serial.print("Cannot connect to server: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+
+  Serial.println("connected to server");
+
+  Serial.println("\nStarting request to server...");
+
+  static const char request[] =
+    "GET /search?q=arduino HTTP/1.1\r\n"
+    "Host: www.google.com\r\n"
+    "Connection: close\r\n"
+    "\r\n";
+
+  size_t written = 0;
+  while(written < sizeof(request) - 1) {
+    auto sent = socket.send(request + written, sizeof(request) - 1 - written);
+    if (sent < 0) {
+      Serial.print("Failed to send: error ");
+      Serial.println(WiFiSocket::lastError());
+      // don't continue
+      while (true);
+    }
+    written += sent;
   }
 }
 
 void loop() {
-  // if there are incoming bytes available
-  // from the server, read them and print them:
-  while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
-  }
+  char buf[256];
 
-  // if the server's disconnected, stop the client:
-  if (!client.connected()) {
-    Serial.println();
-    Serial.println("disconnecting from server.");
-    client.stop();
-
-    // do nothing forevermore:
+  auto read = socket.recv(buf, sizeof(buf));
+  if (read < 0) {
+    auto err = WiFiSocket::lastError();
+    if (err == ENOTCONN) {
+      Serial.println("Server disconnected");
+      socket.close();
+      // do nothing forevermore:
+      while (true);
+    }
+    Serial.print("Failed to read: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
     while (true);
   }
+  // if there are incoming bytes available
+  // from the server, print them:
+  Serial.write(buf, read);
 }
 
 
