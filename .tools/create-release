@@ -2,6 +2,7 @@
 
 import sys
 import re
+import json
 import subprocess
 
 from pathlib import Path
@@ -41,6 +42,13 @@ with open(ROOT / "library.properties", "rt") as lib_props:
 with open(ROOT / "library.properties", "wt") as lib_props:
     lib_props.writelines(lines)
 
-subprocess.run(['git', 'add', ROOT / "CHANGELOG.md", ROOT / "library.properties"], check=True)
+with open(ROOT / "library.json", "rt") as lib_json:
+    lib_json_data = json.load(lib_json)
+lib_json_data["version"] = f'{NEW_VER}'
+with open(ROOT / "library.json", "wt") as lib_json:
+    json.dump(lib_json_data, lib_json, indent=4)
+
+
+subprocess.run(['git', 'add', ROOT / "CHANGELOG.md", ROOT / "library.properties", ROOT / "library.json"], check=True)
 subprocess.run(['git', 'commit', '-m', f'chore: creating version {NEW_VER}'], check=True)
 subprocess.run(['git', 'tag', f'v{NEW_VER}'], check=True)
