@@ -9,15 +9,12 @@
  Circuit:
  * Analog inputs attached to pins A0 through A5 (optional)
 
- created 13 July 2010
- by dlf (Metodo2 srl)
- modified 31 May 2012
- by Tom Igoe
-
  */
 
 #include <SPI.h>
 #include <BetterWiFiNINA.h>
+#include <errno.h>
+#include <stdio.h>
 
 
 #include "arduino_secrets.h" 
@@ -28,7 +25,7 @@ int keyIndex = 0;                 // your network key index number (needed only 
 
 int status = WL_IDLE_STATUS;
 
-WiFiServer server(80);
+WiFiSocket serverSocket;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -59,63 +56,142 @@ void setup() {
     // wait 10 seconds for connection:
     delay(10000);
   }
-  server.begin();
   // you're connected now, so print out the status:
   printWifiStatus();
+
+  //Create server socket
+  serverSocket = WiFiSocket(WiFiSocket::Type::Stream, WiFiSocket::Protocol::TCP);
+  if (!serverSocket) {
+    Serial.print("Creating server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+  //Bind to port 80
+  if (!serverSocket.bind(80)) {
+    Serial.print("Binding server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
+
+  //And start listening
+  if (!serverSocket.listen(5)) {
+    Serial.print("Listen on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    // don't continue
+    while (true);
+  }
 }
 
 
 void loop() {
-  // listen for incoming clients
-  WiFiClient client = server.available();
-  if (client) {
-    Serial.println("new client");
-    // an HTTP request ends with a blank line
-    boolean currentLineIsBlank = true;
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        // if you've gotten to the end of the line (received a newline
-        // character) and the line is blank, the HTTP request has ended,
-        // so you can send a reply
-        if (c == '\n' && currentLineIsBlank) {
-          // send a standard HTTP response header
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: text/html");
-          client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
-          client.println();
-          client.println("<!DOCTYPE HTML>");
-          client.println("<html>");
-          // output the value of each analog input pin
-          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
-            int sensorReading = analogRead(analogChannel);
-            client.print("analog input ");
-            client.print(analogChannel);
-            client.print(" is ");
-            client.print(sensorReading);
-            client.println("<br />");
-          }
-          client.println("</html>");
-          break;
-        }
-        if (c == '\n') {
-          // you're starting a new line
-          currentLineIsBlank = true;
-        } else if (c != '\r') {
-          // you've gotten a character on the current line
-          currentLineIsBlank = false;
-        }
+  //Accept incoming connection
+  IPAddress addr;
+  uint16_t port;
+  auto sessionSocket = serverSocket.accept(addr, port);
+  if (!sessionSocket) {
+    Serial.print("Accept on server socket failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
+
+  Serial.println("new client");
+
+  //set the session socket to non-blocking
+  if (!sessionSocket.setNonBlocking(true))  {
+    Serial.print("Setting socket to non-blocking failed: error ");
+    Serial.println(WiFiSocket::lastError());
+    delay(100);
+    return;
+  }
+
+  char buffer[256];
+  // an HTTP request ends with a blank line
+  boolean currentLineIsBlank = true;
+  bool doneReading = false;
+
+  //read until \n\r\n
+  while(!doneReading) {
+    auto read = sessionSocket.recv(buffer, sizeof(buffer));
+    if (read < 0) {
+      auto err = WiFiSocket::lastError();
+      if (err == EWOULDBLOCK)
+        continue;
+      Serial.print("reading from socket failed with error: ");
+      Serial.println(err);
+      return;
+    }
+    Serial.write(buffer, read); // print it out to the serial monitor
+    for(int i = 0; i != read; ++i) {
+      char c = buffer[i];
+      // if you've gotten to the end of the line (received a newline
+      // character) and the line is blank, the HTTP request has ended,
+      // so you can send a reply
+      if (c == '\n' && currentLineIsBlank) {
+        doneReading = true;
+        break;
+      } 
+      if (c == '\n') {
+        // you're starting a new line
+        currentLineIsBlank = true;
+      } else if (c != '\r') {
+        // you've gotten a character on the current line
+        currentLineIsBlank = false;
       }
     }
-    // give the web browser time to receive the data
-    delay(1);
-
-    // close the connection:
-    client.stop();
-    Serial.println("client disconnected");
   }
+
+  Serial.println("responding");
+
+  //Our response
+  static const char responsePrefix[] = 
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Type: text/html\r\n"
+      "Connection: close\r\n"
+      "Refresh: 5\r\n"
+      "\r\n"
+      "<!DOCTYPE HTML>\n"
+      "<html><body>";
+  static const char responseSuffix[] =
+      "</body></html>";
+
+  if (!writeBuffer(sessionSocket, responsePrefix, sizeof(responsePrefix) - 1)) {
+    return;
+  }
+
+  // output the value of each analog input pin
+  for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
+    int sensorReading = analogRead(analogChannel);
+    sprintf(buffer, "analog input %d is %d<br />", analogChannel, sensorReading);
+    if (!writeBuffer(sessionSocket, buffer, strlen(buffer))) {
+      return;
+    }
+  }
+      
+  if (!writeBuffer(sessionSocket, responseSuffix, sizeof(responseSuffix) - 1)) {
+    return;
+  }
+
+  Serial.println("client disconnected");
+}
+
+bool writeBuffer(WiFiSocket & socket, const char * buffer, size_t size) {
+  size_t written = 0;
+  while(written != size) {
+    auto sent = socket.send(buffer + written, size - written);
+    if (sent < 0) {
+      auto err = WiFiSocket::lastError();
+      if (err == EWOULDBLOCK)
+        continue;
+      Serial.print("writing to socket failed with error: ");
+      Serial.println(err);
+      return false;
+    }
+    written += sent;
+  }
+  return true;
 }
 
 
