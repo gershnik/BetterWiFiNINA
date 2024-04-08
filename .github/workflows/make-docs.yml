@@ -3,7 +3,7 @@ name: Make Docs
 on:
   workflow_dispatch:
   push:
-    branches: ["master"]
+    branches: ["mainline"]
 
 permissions:
   contents: read
