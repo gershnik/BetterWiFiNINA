@@ -69,6 +69,61 @@ Documentation for this library reflects the new APIs and is available at https:/
 
 All relevant examples in this repository have been changed to use `WiFiSocket` instead of `WiFiClient`/`WiFiServer`/`WiFiUdp`.
 
+## Integration
+
+### Arduino IDE
+
+- Download `BetterWiFiNINA-x.y.z.tar.gz` from the desired release of this library on 
+[Releases](https://github.com/gershnik/BetterWiFiNINA/releases) page.
+- Unpack it into your Arduino libraries folder. By default it is
+  - macOS: `/Users/{username}/Documents/Arduino/libraries`
+  - Linux: `/home/{username}/Arduino/libraries`
+  - Windows: `C:\Users\{username}\Documents\Arduino\libraries`
+
+### PlatformIO
+
+Add:
+
+```ini
+lib_deps =
+    https://github.com/gershnik/BetterWiFiNINA#vX.Y.Z
+```
+
+to your `platformio.ini` file where X.Y.Z is the desired version
+
+### Plain CMake
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(BetterWiFiNINA
+    GIT_REPOSITORY  https://github.com/gershnik/BetterWiFiNINA
+    GIT_TAG         vX.Y.Z
+    GIT_SHALLOW     TRUE
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(BetterWiFiNINA)
+
+add_library(BetterWiFiNINA STATIC)
+
+target_link_libraries(BetterWiFiNINA
+PUBLIC
+    SPI::SPI #replace with whatever name you use for SPI for your CMake setup
+)
+
+target_include_directories(BetterWiFiNINA 
+PUBLIC
+    ${betterwifinina_SOURCE_DIR}/src
+)
+
+file(GLOB_RECURSE BetterWiFiNINA_SOURCES ${betterwifinina_SOURCE_DIR}/src/*.cpp)
+target_sources(BetterWiFiNINA
+PRIVATE
+    ${BetterWiFiNINA_SOURCES}
+)
+
+```
+
 
 ## License
 
