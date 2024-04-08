@@ -28,7 +28,12 @@ jobs:
         run: |
           mkdir build
           tar -czf build/BetterWiFiNINA-${{ env.RELEASE_NAME }}.tar.gz \
-            --exclude-vcs --exclude-vcs-ignores --exclude='.github' --exclude='.tools' --exclude='build' --exclude='.codespellrc' \
+            --exclude-vcs --exclude-vcs-ignores \
+            --exclude='.github' \
+            --exclude='.tools' \
+            --exclude='.docbuild' \
+            --exclude='build' \
+            --exclude='.codespellrc' \
             .
 
       - name: Make release

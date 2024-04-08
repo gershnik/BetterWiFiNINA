@@ -65,9 +65,9 @@ is your only option.
 
 ## Docs and examples
 
-All relevant examples in this repository have been changed to use `WiFiSocket` instead of `WiFiClient`/`WiFiServer`/`WiFiUdp`.
+Documentation for this library reflects the new APIs and is available at https://gershnik.github.io/BetterWiFiNINA/index.html. 
 
-The docs are still the ones from WiFiNINA. Updating/converting them is a work in progress
+All relevant examples in this repository have been changed to use `WiFiSocket` instead of `WiFiClient`/`WiFiServer`/`WiFiUdp`.
 
 
 ## License

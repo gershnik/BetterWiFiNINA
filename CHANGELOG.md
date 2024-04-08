@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - This library can now be used with PlatformIO
+- Documentation has been updated and available now at https://gershnik.github.io/BetterWiFiNINA/index.html
 
 ### Changed
 - All relevant examples have been changed to use `WiFiSocket` instead of `WiFiClient`/`WiFiServer`/`WiFiUdp`

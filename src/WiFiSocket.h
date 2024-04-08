@@ -137,8 +137,11 @@ private:
     };
 
 public:
+    /// A representation of `struct timeval` used by NINA
     struct TimeVal {
-        long long	tv_sec;		
+        /// seconds
+        long long	tv_sec;
+	    /// microseconds
 	    long	    tv_usec;
     };
 
@@ -367,7 +370,7 @@ public:
      *   }
      * ```
      * @tparam Option one of types declared in WiFiSocket::Option 
-     * @param option value to set
+     * @param opt value to set
      * @returns success flag. Check lastError() for more information about failure
     */
     template<class Option>
@@ -392,7 +395,7 @@ public:
      * ```
      * 
      * @tparam Option one of types declared in WiFiSocket::Option 
-     * @param option value to fill in
+     * @param opt value to fill in
      * @returns success flag. Check lastError() for more information about failure
     */
     template<class Option>

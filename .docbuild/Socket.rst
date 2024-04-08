@@ -1,0 +1,8 @@
+Socket
+==========
+
+
+.. doxygenclass:: WiFiSocket
+   :members:
+
+

@@ -1,0 +1,20 @@
+#! /usr/bin/env -S python3 -u
+
+import sys
+import subprocess
+import shutil
+
+from pathlib import Path
+
+ROOTDIR = Path(__file__).parent.parent
+
+(ROOTDIR / 'build/doxygen').mkdir(parents=True, exist_ok=True)
+if (ROOTDIR / 'build/sphinx').exists():
+    shutil.rmtree(ROOTDIR / 'build/sphinx')
+
+res = subprocess.run(['doxygen', '.docbuild/Doxyfile'], cwd=ROOTDIR)
+if res.returncode != 0:
+    sys.exit(1)
+res = subprocess.run(['sphinx-build', '-M', 'html', '.docbuild', 'build/sphinx'], cwd=ROOTDIR)
+if res.returncode != 0:
+    sys.exit(1)

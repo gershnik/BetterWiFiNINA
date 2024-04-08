@@ -18,6 +18,83 @@
     "frameworks": ["Arduino"],
     "headers": "BetterWiFiNINA.h",
     "export": {
-        "exclude": [".github", ".vscode", ".codespellrc", ".tools", "build"]
-    }
+        "exclude": [".github", ".vscode", ".codespellrc", ".tools", ".docbuild", ".venv", "build"]
+    },
+    "examples": [
+        {
+            "name": "AP_SimpleWebServer",
+            "base": "examples/AP_SimpleWebServer",
+            "files": ["AP_SimpleWebServer.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "ConnectNoEncryption",
+            "base": "examples/ConnectNoEncryption",
+            "files": ["ConnectNoEncryption.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "ConnectWithWEP",
+            "base": "examples/ConnectWithWEP",
+            "files": ["ConnectWithWEP.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "ConnectWithWPA",
+            "base": "examples/ConnectWithWPA",
+            "files": ["ConnectWithWPA.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "ConnectWithWPA2Enterprise",
+            "base": "examples/ConnectWithWPA2Enterprise",
+            "files": ["ConnectWithWPA2Enterprise.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "ScanNetworks",
+            "base": "examples/ScanNetworks",
+            "files": ["ScanNetworks.ino"]
+        },
+        {
+            "name": "ScanNetworksAdvanced",
+            "base": "examples/ScanNetworksAdvanced",
+            "files": ["ScanNetworksAdvanced.ino"]
+        },
+        {
+            "name": "SimpleWebServerWiFi",
+            "base": "examples/SimpleWebServerWiFi",
+            "files": ["SimpleWebServerWiFi.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiChatServer",
+            "base": "examples/WiFiChatServer",
+            "files": ["WiFiChatServer.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiPing",
+            "base": "examples/WiFiPing",
+            "files": ["WiFiPing.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiSSLClient",
+            "base": "examples/WiFiSSLClient",
+            "files": ["WiFiSSLClient.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiStorage",
+            "base": "examples/WiFiStorage",
+            "files": ["WiFiStorage.ino"]
+        },
+        {
+            "name": "WiFiUdpSendReceiveString",
+            "base": "examples/WiFiUdpSendReceiveString",
+            "files": ["WiFiUdpSendReceiveString.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiWebClient",
+            "base": "examples/WiFiWebClient",
+            "files": ["WiFiWebClient.ino", "arduino_secrets.h"]
+        },
+        {
+            "name": "WiFiWebClientRepeating",
+            "base": "examples/WiFiWebClientRepeating",
+            "files": ["WiFiWebClientRepeating.ino", "arduino_secrets.h"]
+        }
+    ]
 }
