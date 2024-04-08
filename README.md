@@ -82,14 +82,23 @@ All relevant examples in this repository have been changed to use `WiFiSocket` i
 
 ### PlatformIO
 
-Add:
+Use either:
+
+```ini
+lib_deps =
+    gershnik/BetterWiFiNINA@X.Y.Z
+```
+
+or
 
 ```ini
 lib_deps =
     https://github.com/gershnik/BetterWiFiNINA#vX.Y.Z
 ```
 
-to your `platformio.ini` file where X.Y.Z is the desired version
+to your `platformio.ini` file where X.Y.Z is the desired version.
+
+Note that the second form allows you to reference unreleased code at specific branches or commits, if desired.
 
 ### Plain CMake
 
