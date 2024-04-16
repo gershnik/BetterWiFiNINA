@@ -96,6 +96,18 @@ public:
     {}
 
     /**
+     * Moving a socket
+     * 
+     * The source socket is left in an invalid state
+    */
+    WiFiBearSSLSocket(WiFiBearSSLSocket && src): 
+        m_socket(static_cast<WiFiSocket &&>(src.m_socket)),
+        m_engine(src.m_engine)
+    { 
+        src.m_engine = nullptr;
+    }
+
+    /**
      * Move-assigning a socket
      * 
      * The source socket is left in an invalid state

@@ -27,6 +27,7 @@
 int WiFiBearSSLSocket::s_lastError = 0;
 
 bool WiFiBearSSLSocket::handshake() {
+    s_lastError = 0;
     while ( true ) {
         auto state = br_ssl_engine_current_state(m_engine);
 
@@ -79,6 +80,7 @@ bool WiFiBearSSLSocket::handshake() {
 
 int32_t WiFiBearSSLSocket::send(const void * src, uint16_t size) {
 
+    s_lastError = 0;
     if (size == 0)
         return 0;
 
@@ -158,6 +160,7 @@ int32_t WiFiBearSSLSocket::send(const void * src, uint16_t size) {
 }
 
 int32_t WiFiBearSSLSocket::recv(void * dest, uint16_t size) {
+    s_lastError = 0;
     if (size == 0)
         return 0;
 
@@ -241,6 +244,7 @@ bool WiFiBearSSLSocket::flush() {
 }
 
 bool WiFiBearSSLSocket::finish() {
+    s_lastError = 0;
     br_ssl_engine_close(m_engine);
     while ( true ) {
         auto state = br_ssl_engine_current_state(m_engine);
