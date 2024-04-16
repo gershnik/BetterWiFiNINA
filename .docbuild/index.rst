@@ -8,8 +8,9 @@ Home
 
    WiFi
    Socket
-   Client
+   BearSSLSocket
    UDP
+   Client
    Server
 
 
@@ -36,8 +37,9 @@ The following pages describe various aspects of the library functionality:
 
 * :doc:`WiFi` - connect to/establish a WiFi network and various global functionality
 * :doc:`Socket` - a safe interface to BSD-style sockets. Use this interface if possible.
-* :doc:`Client` - a simplified interface to plain TCP and SSL clients. Only necessary for SSL connections.
+* :doc:`BearSSLSocket` - a using sockets with Bear SSL. Use this interface if possible.
 * :doc:`UDP` - a simplified interface to UDP. 
+* :doc:`Client` - a simplified interface to plain TCP and SSL clients. Only useful for client SSL connections and otherwise deprecated.
 * :doc:`Server` - don't use
 
 Various examples can be found `here <https://github.com/gershnik/BetterWiFiNINA/tree/mainline/examples>`_.

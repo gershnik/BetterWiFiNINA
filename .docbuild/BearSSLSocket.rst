@@ -1,0 +1,8 @@
+BearSSLSocket
+=============
+
+
+.. doxygenclass:: WiFiBearSSLSocket
+   :members:
+
+

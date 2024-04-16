@@ -1,0 +1,11 @@
+
+/*make sidebar scrollable if too wide */
+div.sphinxsidebarwrapper {
+    overflow-x: auto;
+}
+
+/* make sidebar text wrap */
+/* a.reference span.pre {
+    white-space: normal;
+    word-wrap: break-word;
+} */

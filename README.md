@@ -13,6 +13,9 @@
 [mbedos-arduino]: https://docs.arduino.cc/software/ide-v1/tutorials/getting-started/cores/arduino-mbed_nano
 [mbed-tls]: https://www.trustedfirmware.org/projects/mbed-tls/
 [rp2040-https]: https://gershnik.github.io/2024/04/03/https-arduino-nano-rp2040.html
+[nina-root-cert]: https://support.arduino.cc/hc/en-us/articles/360016119219-Upload-SSL-root-certificates
+[arduino-bear-ssl]: https://github.com/arduino-libraries/ArduinoBearSSL
+[mbed-nano-tls]: https://github.com/gershnik/MbedNanoTLS
 
 <!-- End Links -->
 
@@ -46,22 +49,27 @@ servers and clients.
 If you are familiar with a regular BSD socket API this interface should provide a far better and easier experience than
 using `WiFiClient`/`WiFiServer`.
 
-#### But what about SSL?
+### Bear SSL wrapper over plain BSD sockets
 
-One thing `WiFiClient`/`WiFiServer` interface provides that `WiFiSocket` doesn't, is a transparent ability to perform 
-**client-only** SSL communication. The facilities to do so are baked into NINA firmware and currently are not directly 
-exposed the way plain sockets are. Client-only means that you can connect to SSL servers as a client but not run your own 
-server. It also must be mentioned that to manage SSL certificate trust you need to go through a cumbersome process of uploading
-trusted root certificates to the NINA chip.
+[WiFiNINA][wifinina] lets you create SSL clients (but not servers!) via `WiFiClient`/`WiFiSSLClient` classes. This is convenient since you do not need any additional libraries but comes at a price of the aforementioned clunky interface and clunky process to [set up certificate trust][nina-root-cert]. On the other hand, using `WiFiSSLClient` makes SSL happen on Nina chip saving you significant amount of main board memory.
 
-Fortunately, as long as your Arduino board software is [Mbed OS based][mbedos-arduino] there is usually a better way. Mbed OS includes 
-[Mbed TLS][mbed-tls] which is the same library NINA firmware uses to provide SSL functionality. It is relatively straightforward
-to integrate Mbed TLS (via custom BIO) with `WiFiSocket` and voila - you now have an ability to run *both* SSL servers and clients
+This library provides `WiFiBearSSLSocket` class that connects `WiFiSocket` with Bear SSL library and allows you to create either SSL clients or servers. You can most easily obtain Bear SSL via [ArduinoBearSSL][arduino-bear-ssl] library but other methods are also possible such as building it directly.
+
+Note that running SSL (especially servers!) is RAM hungry. If your chip has only 32kB of RAM or less you might need to take extra precautions to avoid running out of memory. If your own code is already large then using `WiFiClient` for SSL and not having a server might be your only option.
+
+The [WiFiBearSSLServer](examples/WiFiBearSSLServer) example demonstrates how to create an SSL server using `WiFiBearSSLSocket`.
+
+
+### SSL via Mbed TLS
+
+If your Arduino board software is [Mbed OS based][mbedos-arduino] it is also possible to use `WiFiSocket` with [Mbed TLS][mbed-tls] which is the same library NINA firmware uses to provide SSL functionality. 
+
+An older and slower version of it is included with your board library but you can also obtain latest and much faster one via [MbedNanoTLS][mbed-nano-tls] library.
+
+It is relatively straightforward
+to integrate Mbed TLS (via custom BIO) with `WiFiSocket` which gives you an ability to run *both* SSL servers and clients
 with certificates and trust under your full control. [This article][rp2040-https] describes how to do so on Nano RP2040 Connect board.
 It should be possible to easily extend the approach shown there to any other Mbed OS based board.
-
-If your board is not Mbed OS based then, as far as I know, you are out of luck and using `WiFiSSLClient` with all its limitations
-is your only option.
 
 ## Docs and examples
 

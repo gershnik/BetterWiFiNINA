@@ -99,6 +99,15 @@
             ]
         },
         {
+            "name": "WiFiBearSSLServer",
+            "base": "examples/WiFiBearSSLServer",
+            "files": [
+                "WiFiBearSSLServer.ino",
+                "ArduinoBearSSLConfig.h",
+                "arduino_secrets.h"
+            ]
+        },
+        {
             "name": "WiFiChatServer",
             "base": "examples/WiFiChatServer",
             "files": [
