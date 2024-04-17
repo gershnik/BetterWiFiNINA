@@ -116,6 +116,14 @@
             ]
         },
         {
+            "name": "WiFiMbedTLSServer",
+            "base": "examples/WiFiMbedTLSServer",
+            "files": [
+                "WiFiMbedTLSServer.ino",
+                "arduino_secrets.h"
+            ]
+        },
+        {
             "name": "WiFiPing",
             "base": "examples/WiFiPing",
             "files": [

@@ -68,6 +68,8 @@ An older and slower version of it is included with your board library but you ca
 
 This library provides `WiFiMbedTLSSocket` class that connects `WiFiSocket` with Mbed TLS and allows you to create either SSL clients or servers.
 
+The [WiFiMbedTLSServer](examples/WiFiMbedTLSServer) example demonstrates how to create an SSL server using `WiFiMbedTLSSocket`.
+
 ## Docs and examples
 
 Documentation for this library reflects the new APIs and is available at https://gershnik.github.io/BetterWiFiNINA/index.html. 
