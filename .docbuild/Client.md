@@ -2,7 +2,7 @@
 
 The `Client` class hierarchy provides a simplified interface to plain TCP and SSL clients. 
 
-`WiFiClient` is mostly obsolete as all of its functionality and more can be accomplished using [WiFiSocket](Socket.rst) and [WiFiBearSSLSocket](BearSSLSocket.rst)  class instead.
+`WiFiClient` is mostly obsolete as all of its functionality and more can be accomplished using [WiFiSocket](Socket.rst), [WiFiBearSSLSocket](BearSSLSocket.rst) or [WiFiMbedTLSSocket](MbedTLSSocket.rst) class instead.
 
 `WiFiSSLClient` may still be useful to perform SSL client connections without external SSL libraries.
 

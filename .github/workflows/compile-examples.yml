@@ -56,46 +56,38 @@ jobs:
       matrix:
         board:
           - fqbn: arduino:samd:mkrwifi1010
-            size: medium
             platforms: |
               - name: arduino:samd
+            libraries: |
+              - name: ArduinoBearSSL
+            sketch-paths: |
+              - examples/WiFiBearSSLServer
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:samd:mkrvidor4000
-            size: small
             platforms: |
               - name: arduino:samd
             artifact-name-suffix: arduino-samd-mkrvidor4000
           - fqbn: arduino:samd:nano_33_iot
-            size: medium
             platforms: |
               - name: arduino:samd
+            libraries: |
+              - name: ArduinoBearSSL
+            sketch-paths: |
+              - examples/WiFiBearSSLServer
             artifact-name-suffix: arduino-samd-nano_33_iot
           - fqbn: arduino:megaavr:uno2018:mode=on
-            size: small
             platforms: |
               - name: arduino:megaavr
             artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:mbed_nano:nanorp2040connect
-            size: large
             platforms: |
               - name: arduino:mbed_nano
+            libraries: |
+              - name: ArduinoBearSSL
+            sketch-paths: |
+              - examples/WiFiBearSSLServer
+              - examples/WiFiMbedTLSServer
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
-
-        # make board type-specific customizations to the matrix jobs
-        include:
-          - board:
-              size: large
-            libraries: |
-              - name: ArduinoBearSSL
-            sketch-paths: |
-              - examples/WiFiBearSSLServer
-          
-          - board:
-              size: medium
-            libraries: |
-              - name: ArduinoBearSSL
-            sketch-paths: |
-              - examples/WiFiBearSSLServer
 
     
     steps:
@@ -112,10 +104,10 @@ jobs:
             - source-path: ./
             # Install library dependencies.
             - name: VidorPeripherals
-            ${{ matrix.libraries }}
+            ${{ matrix.board.libraries }}
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
-            ${{ matrix.sketch-paths }}
+            ${{ matrix.board.sketch-paths }}
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 

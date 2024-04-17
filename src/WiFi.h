@@ -38,6 +38,7 @@ extern "C" {
 #include "WiFiStorage.h"
 #include "WiFiSocket.h"
 #include "WiFiBearSSLSocket.h"
+#include "WiFiMbedTLSSocket.h"
 
 typedef void(*FeedHostProcessorWatchdogFuncPointer)();
 

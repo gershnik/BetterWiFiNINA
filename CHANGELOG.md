@@ -5,11 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- `WiFiMbedTLSSocket` class to allow SSL over plain sockets using Mbed TLS.
+- `WiFiMbedTLSServer` sample that demonstrates an SSL web server over plain sockets using Mbed TLS
+
+### Fixed
+- Added missing move constructor to `WiFiBearSSLSocket`
+- Made `WiFiBearSSLSocket::lastError()` correctly report 0 on success.
+
 ## [1.2.0] - 2024-04-16
 
 ### Added
-- `WiFiBearSSLSocket` class to allow SSL over plain sockets.
-- `WiFiBearSSLServer` sample that demonstrates an SSL web server over plain sockets
+- `WiFiBearSSLSocket` class to allow SSL over plain sockets using Bear SSL.
+- `WiFiBearSSLServer` sample that demonstrates an SSL web server over plain sockets using Bear SSL
 
 ## [1.1.0] - 2024-04-07
 

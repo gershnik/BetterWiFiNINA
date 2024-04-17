@@ -1,0 +1,8 @@
+MbedTLSSocket
+=============
+
+
+.. doxygenclass:: WiFiMbedTLSSocket
+   :members:
+
+
