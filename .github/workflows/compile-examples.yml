@@ -58,6 +58,8 @@ jobs:
           - fqbn: arduino:samd:mkrwifi1010
             platforms: |
               - name: arduino:samd
+            libraries: |
+              - name: ArduinoBearSSL
             sketch-paths: |
               - examples/WiFiBearSSLServer
             artifact-name-suffix: arduino-samd-mkrwifi1010
@@ -68,6 +70,8 @@ jobs:
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
               - name: arduino:samd
+            libraries: |
+              - name: ArduinoBearSSL
             sketch-paths: |
               - examples/WiFiBearSSLServer
             artifact-name-suffix: arduino-samd-nano_33_iot
@@ -78,6 +82,8 @@ jobs:
           - fqbn: arduino:mbed_nano:nanorp2040connect
             platforms: |
               - name: arduino:mbed_nano
+            libraries: |
+              - name: ArduinoBearSSL
             sketch-paths: |
               - examples/WiFiBearSSLServer
               - examples/WiFiMbedTLSServer
@@ -98,7 +104,7 @@ jobs:
             - source-path: ./
             # Install library dependencies.
             - name: VidorPeripherals
-            ${{ matrix.libraries }}
+            ${{ matrix.board.libraries }}
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.board.sketch-paths }}
