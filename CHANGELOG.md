@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.3.0] - 2024-04-16
+
 ### Added
 - `WiFiMbedTLSSocket` class to allow SSL over plain sockets using Mbed TLS.
 - `WiFiMbedTLSServer` sample that demonstrates an SSL web server over plain sockets using Mbed TLS
@@ -36,3 +38,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 [1.0.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.0.0
 [1.1.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.1.0
 [1.2.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.2.0
+[1.3.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.3.0
