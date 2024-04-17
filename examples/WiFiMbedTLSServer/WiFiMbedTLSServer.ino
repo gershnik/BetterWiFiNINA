@@ -5,27 +5,18 @@
 
  This example requires:
  - Mbed OS based board
+ - At least 64kB of RAM
  - Optional: MbedNanoTLS library (https://github.com/gershnik/MbedNanoTLS)
 
  */
-
-//Define LARGE_MEMORY_DEVICE to 1 if your device has at least 128kB RAM
-
-//If your board is very memory constrained you can save more memory by 
-//dropping PEM parsing below and pre-parse the certificates using Bear SSL
-//`brssl` command line tool. See Bear SSL documentation for more details.
-
-#ifdef ARDUINO_NANO_RP2040_CONNECT
-  #define LARGE_MEMORY_DEVICE 1
-#endif
 
 
 //BetterWiFiNINA library
 //Obtain at https://github.com/gershnik/BetterWiFiNINA
 #include <BetterWiFiNINA.h>
 
-//For better performance use MbedNanoTLS library
-#define USE_MBED_NANO_TLS 1
+//For better performance uncomment the line below to use MbedNanoTLS library
+//#define USE_MBED_NANO_TLS 1
 
 #if USE_MBED_NANO_TLS
   #include <MbedNanoTLS.h>
