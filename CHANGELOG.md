@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+Integrated updates from upstream WiFiNINA 1.9. See [its changelog](https://github.com/arduino-libraries/WiFiNINA/blob/master/CHANGELOG) for more info.
+
 ## [1.3.0] - 2024-04-16
 
 ### Added
