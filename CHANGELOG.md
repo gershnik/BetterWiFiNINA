@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.4] - 2025-01-21
+
 ### Added
 
 Integrated updates from upstream WiFiNINA 1.9. See [its changelog](https://github.com/arduino-libraries/WiFiNINA/blob/master/CHANGELOG) for more info.
@@ -43,3 +45,4 @@ Integrated updates from upstream WiFiNINA 1.9. See [its changelog](https://githu
 [1.1.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.1.0
 [1.2.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.2.0
 [1.3.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.3.0
+[1.4]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.4
