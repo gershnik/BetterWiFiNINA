@@ -1299,6 +1299,58 @@ Serial.println(gateway);
 
 ```
 
+### `WiFi.dnsIP()`
+```{eval-rst}
+.. index:: WiFi::dnsIP (C++ function)
+```
+
+#### Description
+
+Returns the DNS server IP address for the device.
+
+
+#### Syntax
+
+```
+WiFi.dnsIP()
+WiFi.dnsIP(n)
+
+```
+
+#### Parameters
+optional parameter n for the number of the DNS server to get the second DNS serverv
+
+#### Returns
+- the DNS server IP address for the device (IPAddress).
+
+#### Example
+
+```cpp
+
+IPAddress emptyIP;
+
+int status = WiFi.begin(ssid, pass);
+if ( status != WL_CONNECTED) {
+  Serial.println("Couldn't get a WiFi connection");
+  while(true);
+}
+
+Serial.print("DHCP assigned DNS server: ");
+IPAddress dns1 = WiFi.dnsIP();
+if (dns1 == emptyIP) {
+  Serial.println("not set");
+} else {
+  dns1.printTo(Serial);
+  Serial.println();
+  IPAddress dns2 = WiFi.dnsIP(1);
+  if (dns2 != emptyIP) {
+    Serial.print("DNS server2: ");
+    dns2.printTo(Serial);
+    Serial.println();
+  }
+}
+```
+
 ### `WiFi.getTime()`
 ```{eval-rst}
 .. index:: WiFi::getTime (C++ function)
