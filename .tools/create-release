@@ -15,7 +15,7 @@ NEW_VER = sys.argv[1]
 
 unreleased_link_pattern = re.compile(r"^\[Unreleased\]: (.*)$", re.DOTALL)
 lines = []
-with open(ROOT / "CHANGELOG.md", "rt") as change_log:
+with open(ROOT / "CHANGELOG.md", "rt", encoding="utf-8") as change_log:
     for line in change_log.readlines():
         # Move Unreleased section to new version
         if re.fullmatch(r"^## Unreleased.*$", line, re.DOTALL):
@@ -28,24 +28,24 @@ with open(ROOT / "CHANGELOG.md", "rt") as change_log:
             lines.append(line)
     lines.append(f'[{NEW_VER}]: https://github.com/gershnik/BetterWiFiNINA/releases/v{NEW_VER}\n')
 
-with open(ROOT / "CHANGELOG.md", "wt") as change_log:
+with open(ROOT / "CHANGELOG.md", "wt", encoding="utf-8") as change_log:
     change_log.writelines(lines)
 
 lines = []
-with open(ROOT / "library.properties", "rt") as lib_props:
+with open(ROOT / "library.properties", "rt", encoding="utf-8") as lib_props:
     for line in lib_props.readlines():
         if re.fullmatch(r"^version=.*$", line, re.DOTALL):
             lines.append(f'version={NEW_VER}\n')
         else:
             lines.append(line)
 
-with open(ROOT / "library.properties", "wt") as lib_props:
+with open(ROOT / "library.properties", "wt", encoding="utf-8") as lib_props:
     lib_props.writelines(lines)
 
-with open(ROOT / "library.json", "rt") as lib_json:
+with open(ROOT / "library.json", "rt", encoding="utf-8") as lib_json:
     lib_json_data = json.load(lib_json)
 lib_json_data["version"] = f'{NEW_VER}'
-with open(ROOT / "library.json", "wt") as lib_json:
+with open(ROOT / "library.json", "wt", encoding="utf-8") as lib_json:
     json.dump(lib_json_data, lib_json, indent=4)
 
 
