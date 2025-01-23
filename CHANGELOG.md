@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.4.1] - 2025-01-23
+
 ### Changed
 
 - Version change only. This fixes some packaging snafus with version 1.4.0
@@ -50,3 +52,4 @@ Integrated updates from upstream WiFiNINA 1.9. See [its changelog](https://githu
 [1.2.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.2.0
 [1.3.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.3.0
 [1.4.0]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.4.0
+[1.4.1]: https://github.com/gershnik/BetterWiFiNINA/releases/v1.4.1
