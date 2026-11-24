@@ -61,10 +61,15 @@ jobs:
               - name: ArduinoBearSSL
             sketch-paths: |
               - examples/WiFiBearSSLServer
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:samd:mkrvidor4000
             platforms: |
               - name: arduino:samd
+            sketch-paths: |
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
             artifact-name-suffix: arduino-samd-mkrvidor4000
           - fqbn: arduino:samd:nano_33_iot
             platforms: |
@@ -73,6 +78,8 @@ jobs:
               - name: ArduinoBearSSL
             sketch-paths: |
               - examples/WiFiBearSSLServer
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
             artifact-name-suffix: arduino-samd-nano_33_iot
           - fqbn: arduino:megaavr:uno2018:mode=on
             platforms: |
@@ -86,36 +93,9 @@ jobs:
             sketch-paths: |
               - examples/WiFiBearSSLServer
               - examples/WiFiMbedTLSServer
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
-
-        include:
-          # mkrwifi1010
-          - board:
-              fqbn: arduino:samd:mkrwifi1010
-            sketch-paths: |
-              - examples/PreferencesCounter
-              - examples/PreferencesValidation
-          # mkrvidor4000
-          - board:
-              fqbn: arduino:samd:mkrvidor4000
-            sketch-paths: |
-              - examples/PreferencesCounter
-              - examples/PreferencesValidation
-          # nano_33_iot
-          - board:
-              fqbn: arduino:samd:nano_33_iot
-            sketch-paths: |
-              - examples/PreferencesCounter
-              - examples/PreferencesValidation
-          # uno2018
-          - board:
-              fqbn: arduino:megaavr:uno2018:mode=on
-          # nanorp2040connect
-          - board:
-              fqbn: arduino:mbed_nano:nanorp2040connect
-            sketch-paths: |
-              - examples/PreferencesCounter
-              - examples/PreferencesValidation
 
     steps:
       - name: Checkout
