@@ -5,13 +5,13 @@ You should use [WiFiSocket](Socket.rst) class instead.
 
 ## Server Class
 
-### `Server()`
+### `Server`
 
 #### Description
 
 Server is the base class for all WiFi server based calls. It is not called directly, but invoked whenever you use a function that relies on it.
 
-### `WiFiServer()`
+### `WiFiServer`
 
 #### Description
 
@@ -78,12 +78,13 @@ Tells the server to begin listening for incoming connections.
 
 ```
 server.begin()
+server.begin(port)
 
 ```
 
 #### Parameters
 
-- None
+- port (optional): the port to listen on (int)
 
 #### Returns
 

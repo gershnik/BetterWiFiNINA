@@ -1318,7 +1318,7 @@ WiFi.dnsIP(n)
 ```
 
 #### Parameters
-optional parameter n for the number of the DNS server to get the second DNS serverv
+optional parameter n for the number of the DNS server to get the second DNS server
 
 #### Returns
 - the DNS server IP address for the device (IPAddress).

@@ -23,12 +23,12 @@
 #include <errno.h>
 
 #include "socket_drv.h"
-#include "spi_drv.h"
+#include "spi_ext/spi_ext.h"
 
 extern "C" {
     #include "wifi_spi.h"
     #include "wl_types.h"
-    #include "debug.h"
+    #include "utility/debug.h"
 }
 
 namespace {
@@ -569,7 +569,7 @@ int32_t SocketDrv::recvFrom(uint8_t s, void * buf, uint16_t size,
             {0, (char*)&remotePortTmp},
             {0, (char*)buf}
         };
-        if (!SpiDrv::waitResponseParams(cmd, PARAM_NUMS_3, params)) {
+        if (!SpiExt_waitResponseParams(cmd, PARAM_NUMS_3, params)) {
             WARN("error waitResponse");
             g_lastError = SocketDrv::Failure;
             return -1;
