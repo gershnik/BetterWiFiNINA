@@ -131,6 +131,7 @@ jobs:
             - source-path: ./
             # Install library dependencies.
             - name: VidorPeripherals
+            - name: Arduino_SpiNINA
             ${{ matrix.board.libraries }}
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
