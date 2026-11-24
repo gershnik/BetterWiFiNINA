@@ -23,7 +23,7 @@
 #include <stdint.h>
 
 #include "Arduino.h"
-#include "spi_ext/spi_drv.h"
+#include <spi_drv.h>
 #include "utility/wifi_drv.h"
 
 #define _DEBUG_
@@ -31,7 +31,7 @@
 extern "C" {
 #include "utility/wifi_spi.h"
 #include "utility/wl_types.h"
-#include "spi_ext/debug.h"
+#include "utility/debug.h"
 }
 
 // Array of data to cache the information related to the networks discovered

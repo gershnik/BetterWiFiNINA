@@ -23,11 +23,11 @@
 #include "utility/server_drv.h"
 
 #include "Arduino.h"
-#include "spi_ext/spi_drv.h"
+#include <Arduino_SpiNINA.h>
 
 extern "C" {
 #include "utility/wl_types.h"
-#include "spi_ext/debug.h"
+#include "utility/debug.h"
 }
 
 
