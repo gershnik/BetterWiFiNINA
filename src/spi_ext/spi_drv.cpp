@@ -20,7 +20,7 @@
 
 #include "Arduino.h"
 #include <SPI.h>
-#include "utility/spi_drv.h"
+#include "spi_drv.h"
 #include "pins_arduino.h"
 #include "WiFi.h"
 
@@ -47,7 +47,7 @@
 
 //#define _DEBUG_
 extern "C" {
-#include "utility/debug.h"
+#include "debug.h"
 }
 
 static uint8_t SLAVESELECT = 10; // ss
@@ -504,7 +504,7 @@ int SpiDrv::waitResponse(uint8_t cmd, uint8_t* numParamRead, uint8_t** params, u
     return 1;
 }
 
-void SpiDrv::sendParamNoLen(uint8_t* param, size_t param_len, uint8_t lastParam)
+void SpiDrv::sendParamNoLen(const uint8_t* param, size_t param_len, uint8_t lastParam)
 {
     size_t i = 0;
     // Send SPI paramLen
@@ -521,7 +521,7 @@ void SpiDrv::sendParamNoLen(uint8_t* param, size_t param_len, uint8_t lastParam)
         spiTransfer(END_CMD);
 }
 
-void SpiDrv::sendParam(uint8_t* param, uint8_t param_len, uint8_t lastParam)
+void SpiDrv::sendParam(const uint8_t* param, uint8_t param_len, uint8_t lastParam)
 {
     int i = 0;
     // Send SPI paramLen
@@ -572,7 +572,7 @@ uint16_t SpiDrv::readParamLen16(uint16_t* param_len)
 }
 
 
-void SpiDrv::sendBuffer(uint8_t* param, uint16_t param_len, uint8_t lastParam)
+void SpiDrv::sendBuffer(const uint8_t* param, uint16_t param_len, uint8_t lastParam)
 {
     uint16_t i = 0;
 

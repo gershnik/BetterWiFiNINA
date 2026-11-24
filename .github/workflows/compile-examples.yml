@@ -29,17 +29,17 @@ jobs:
 
     env:
       SKETCHES_REPORTS_PATH: sketches-reports
-      # sketch paths to compile (recursive) for all boards
       UNIVERSAL_SKETCH_PATHS: |
         - examples/AP_SimpleWebServer
         - examples/ConnectNoEncryption
         - examples/ConnectWithWEP
         - examples/ConnectWithWPA
         - examples/ConnectWithWPA2Enterprise
+        - examples/Prefs2Struct
         - examples/ScanNetworks
         - examples/ScanNetworksAdvanced
         - examples/SimpleWebServerWiFi
-        - examples/Tools
+        - examples/WiFiAdvancedChatServer
         - examples/WiFiChatServer
         - examples/WiFiPing
         - examples/WiFiSSLClient
@@ -49,7 +49,6 @@ jobs:
         - examples/WiFiWebClient
         - examples/WiFiWebClientRepeating
         - examples/WiFiWebServer
-
     strategy:
       fail-fast: false
 
@@ -89,10 +88,38 @@ jobs:
               - examples/WiFiMbedTLSServer
             artifact-name-suffix: arduino-mbed_nano-nanorp2040connect
 
-    
+        include:
+          # mkrwifi1010
+          - board:
+              fqbn: arduino:samd:mkrwifi1010
+            sketch-paths: |
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
+          # mkrvidor4000
+          - board:
+              fqbn: arduino:samd:mkrvidor4000
+            sketch-paths: |
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
+          # nano_33_iot
+          - board:
+              fqbn: arduino:samd:nano_33_iot
+            sketch-paths: |
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
+          # uno2018
+          - board:
+              fqbn: arduino:megaavr:uno2018:mode=on
+          # nanorp2040connect
+          - board:
+              fqbn: arduino:mbed_nano:nanorp2040connect
+            sketch-paths: |
+              - examples/PreferencesCounter
+              - examples/PreferencesValidation
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Compile examples
         uses: arduino/compile-sketches@v1
@@ -112,7 +139,7 @@ jobs:
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       - name: Save memory usage change report as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
           path: ${{ env.SKETCHES_REPORTS_PATH }}

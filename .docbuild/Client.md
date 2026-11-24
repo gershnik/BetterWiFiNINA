@@ -8,7 +8,7 @@ The `Client` class hierarchy provides a simplified interface to plain TCP and SS
 
 ## Client Class
 
-### `Client()`
+### `Client`
 ```{eval-rst}
 .. index:: Client (C++ class)
 ```
@@ -17,7 +17,7 @@ The `Client` class hierarchy provides a simplified interface to plain TCP and SS
 
 Client is the base class for all WiFi client based calls. It is not called directly, but invoked whenever you use a function that relies on it.
 
-### `WiFiClient()`
+### `WiFiClient`
 ```{eval-rst}
 .. index:: WiFiClient (C++ class)
 ```
@@ -956,3 +956,68 @@ client.remotePort()
 #### Returns
 The port of the remote host that the client is connected to
 
+### `client.setConnectionTimeout()`
+
+#### Description
+
+Set the timeout for client.connect(). With timeout value not set, a connect attempt times out after the time determined by the firmware which is more than 18 seconds. You might prefer to set a lower timeout value to make your program more responsive in the event something goes wrong.
+
+
+#### Syntax
+
+```
+client.setConnectionTimeout(milliseconds)
+
+```
+
+#### Parameters
+- milliseconds: the timeout duration for client.connect() (uint16_t)
+
+#### Returns
+Nothing
+
+#### Example
+
+```
+#include <WiFiNINA.h>
+
+#include "arduino_secrets.h"
+char ssid[] = SECRET_SSID;
+char pass[] = SECRET_PASS;
+
+IPAddress server(192,168,0,177);
+WiFiClient client;
+
+void setup() {
+
+  Serial.begin(115200);
+  while (!Serial) {}
+
+  Serial.print("Attempting to connect to SSID: ");
+  Serial.println(ssid);
+  int status = WiFi.begin(ssid, pass);
+  if ( status != WL_CONNECTED) {
+    Serial.println("Couldn't get a WiFi connection");
+    while(true);
+  }
+
+  client.setConnectionTimeout(3000); // 3 seconds
+
+  Serial.println("\nStarting connection to server...");
+  unsigned long startTime = millis();
+  if (client.connect(server, 80)) {
+    client.println("Connected");
+  } else {
+    client.println("Not Connected");
+  }
+
+  Serial.print("connect time (milliseconds): ");
+  Serial.println(millis()- startTime);
+
+  client.stop();
+}
+
+void loop() {
+}
+
+```

@@ -23,12 +23,12 @@
 #include <errno.h>
 
 #include "socket_drv.h"
-#include "spi_drv.h"
+#include "spi_ext/spi_drv.h"
 
 extern "C" {
     #include "wifi_spi.h"
     #include "wl_types.h"
-    #include "debug.h"
+    #include "spi_ext/debug.h"
 }
 
 namespace {
