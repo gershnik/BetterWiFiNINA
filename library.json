@@ -24,6 +24,12 @@
         "Arduino"
     ],
     "headers": "BetterWiFiNINA.h",
+    "dependencies": [
+        {
+            "owner": "arduino-libraries",
+            "name": "Arduino_SpiNINA"
+        }
+    ],
     "export": {
         "exclude": [
             ".github",
