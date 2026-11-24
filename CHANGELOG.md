@@ -5,8 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## [1.5] - 2026-11-24
-
 ### Added
 
 Integrated updates from upstream WiFiNINA 2.1.1. 
